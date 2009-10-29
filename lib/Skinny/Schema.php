@@ -122,6 +122,4 @@ class SkinnySchema
 
         return $data;
     }
-
-
 }
