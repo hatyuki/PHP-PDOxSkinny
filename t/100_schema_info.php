@@ -13,5 +13,9 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
         $schema = new TestSkinnySchema( );
 
         var_dump($schema);
+
+        $this->assertEquals('Bourbon', $schema->bourbon( ));
+        $this->assertEquals('House', $schema->house( ));
+        $this->assertEquals('BourbonARGSHouse', $schema->foo('ARGS'));
     }
 }
