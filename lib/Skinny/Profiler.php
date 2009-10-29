@@ -25,8 +25,8 @@ class SkinnyProfiler
 
         if ( sizeof($bind) != 0) {
             $log .= ' :binds '.join(', ', array_map(
-                array($this, 'join_bind'), $bind)
-            );
+                array($this, 'join_bind'), $bind, array_keys($bind)
+            ) );
         }
 
         $this->query_log[ ] = $log;
@@ -44,8 +44,34 @@ class SkinnyProfiler
     }
 
 
-    private function join_bind ($b)
+    private function join_bind ($val, $key)
     {
-        return is_null($b) ? 'null': $b; 
+        $val = is_null($val) ? 'null' : $val;
+
+        return is_integer($key)
+             ? $val
+             : preg_replace('/^:/', '', $key)." => $val";
+    }
+
+
+    private function ref ($val)
+    {
+        if ( !is_array($val) ) {
+            return 'SCALAR';
+        }
+        else if ( is_array($val) ) {
+            reset($val);
+
+            foreach ($val as $k => $v) {
+                if ( !is_integer($k) ) {
+                    reset($val);
+                    return 'HASH';
+                }
+            }
+
+            return 'ARRAY';
+        }
+
+        return '';
     }
 }
