@@ -2,9 +2,6 @@
 set_include_path('./lib');
 require_once 'Skinny/Schema.php';
 
-set_include_path('./t');
-require_once 'Mock/Basic/Mixin.php';
-
 class TestSkinnySchema extends SkinnySchema
 {
     function __construct ( )
@@ -20,8 +17,5 @@ class TestSkinnySchema extends SkinnySchema
         $this->install_inflate_rule('/.+_at$/', array(
             'inflate' => array($this, 'datetime'),
         ) );
-
-
-        $this->mixin( new MockBasicMixin( ) );
     }
 }

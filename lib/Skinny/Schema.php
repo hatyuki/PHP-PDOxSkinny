@@ -124,34 +124,4 @@ class SkinnySchema
     }
 
 
-    // provides mixin function
-    function __call ($method, $args)
-    {
-        if ( array_key_exists($method, $this->mixins) ) {
-            $func = $this->mixins[$method];
-            return call_user_func($func, $args);
-        }
-
-        trigger_error('Call to undefinded function: '.$method, E_USER_ERROR);
-    }
-
-
-    function mixin ($include)
-    {
-        if ( !is_array($include) ) {
-            $include = array($include);
-        }
-
-        foreach ($include as $obj) {
-            if ( !is_object($obj) ) {
-                $obj = new $obj;
-            }
-
-            $methods = $obj->register_method( );
-
-            foreach ($methods as $method => $callback) {
-                $this->mixins[$method] = $callback;
-            }
-        }
-    }
 }
