@@ -56,7 +56,7 @@ class SkinnySQL
             $col = $term;
         }
 
-        $this->select[ ] =  $term;
+        $this->select[ ] = $term;
 
         $this->select_map[$term] = $col;
         $this->select_map_reverse[$col] = $term;
