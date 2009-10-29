@@ -42,7 +42,7 @@ class SkinnySQL
             return $this->$name;
         }
 
-        $this->$name = $args[0];
+        $this->$name = is_array($args[0]) ? $args[0] : $args;
     }
 
 
@@ -141,9 +141,7 @@ class SkinnySQL
 
         if ( !empty($this->from) ) {
             // TODO: _add_index_hint
-            $sql .= is_array($this->from)
-                  ? join(', ', $this->from)
-                  : $this->from;
+            $sql .= join(', ', $this->from);
         }
 
         $sql .= "\n";
@@ -156,7 +154,11 @@ class SkinnySQL
         $sql .= $this->as_limit( );
 
         if ( !empty($this->comment) ) {
-            if ( preg_match('/([ 0-9a-zA-Z.:;()_#&,]+)/', $this->comment, $m) ) {
+            $comment = is_array($this->comment)
+                     ? $this->comment[0]
+                     : $this->comment;
+
+            if ( preg_match('/([ 0-9a-zA-Z.:;()_#&,]+)/', $comment, $m) ) {
                 $sql .= '-- '.$m[1];
             }
         }
@@ -167,14 +169,23 @@ class SkinnySQL
 
     function as_limit ( )
     {
-        if ( !is_integer($this->limit) || $this->limit == 0 ) {
+        $limit  = is_array($this->limit)  ? $this->limit[0]  : $this->limit;
+        $offset = is_array($this->offset) ? $this->offset[0] : $this->offset;
+
+        if ( empty($limit) ) {
             return '';
         }
 
-        $n = $this->limit;
+        if ( !is_integer($limit) ) {
+            trigger_error(
+                "Non-numerics in limit clause ($limit)", E_USER_ERROR
+            );
+        }
 
-        return sprintf("LIMIT %d%s\n", $n,
-            is_integer($this->offset) ? ' OFFSET '.intval($this->offset) : '');
+        return sprintf("LIMIT %d%s\n",
+            $limit,
+            is_integer($offset) ? ' OFFSET '.intval($offset) : ''
+        );
     }
 
 
@@ -184,7 +195,7 @@ class SkinnySQL
             return '';
         }
 
-        if ( !is_array($attribute) || sizeof($attribute) == 0 ) {
+        if ( sizeof($attribute) == 0 ) {
             return '';
         }
 
@@ -202,7 +213,7 @@ class SkinnySQL
 
     function as_sql_where ( )
     {
-        return is_array($this->where) && sizeof($this->where) != 0
+        return sizeof($this->where) != 0
              ? 'WHERE '.join(' AND ', $this->where)."\n"
              : '';
     }
@@ -404,7 +415,7 @@ class SkinnySQL
 
     function retrieve ( )
     {
-        return $this->skinny->search_by_sql(
+        return $this->skinny[0]->search_by_sql(
             $this->as_sql, $this->bind, $this->from[0]
         );
     }
