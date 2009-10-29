@@ -56,7 +56,7 @@ class SkinnySQL
             $col = $term;
         }
 
-        array_push($this->select, $term);
+        $this->select[ ] =  $term;
 
         $this->select_map[$term] = $col;
         $this->select_map_reverse[$col] = $term;
@@ -69,12 +69,10 @@ class SkinnySQL
     {
         list($table, $joins) = each($args);
 
-        $push = array(
+        $this->joins[ ] = array(
             'table' => $table,
             'joins' => $joins,
         );
-
-        array_push($this->joins, $push);
 
         return $this;
     }
@@ -223,7 +221,7 @@ class SkinnySQL
         list($col,  $val) = each($args);
         list($term, $bind, $tcol) = $this->mk_term($col, $val);
 
-        array_push($this->where, '('.$term.')');
+        $this->where[ ] = '('.$term.')';
         $this->bind = array_merge_recursive($this->bind, $bind);
 
         $this->where_values[$tcol] = $val;
@@ -236,7 +234,7 @@ class SkinnySQL
     {
         list($where, $bind) = $this->parse_array_terms($terms);
 
-        array_push($this->where, $where);
+        $this->where[ ] = $where;
         $this->bind = array_merge_recursive($this->bind,  $bind);
 
         return $this;
@@ -261,7 +259,7 @@ class SkinnySQL
 
         list($term, $bind) = $this->mk_term($col, $val);
 
-        array_push($this->having, "($term)");
+        $this->having[ ] = "($term)";
         $this->bind = array_merge_recursive($this->bind, $bind);
 
         return $this;
@@ -309,7 +307,7 @@ class SkinnySQL
                 foreach ($values as $v) {
                     list($t, $b) = $this->mk_term($col, $v);
 
-                    array_push($terms, "($t)");
+                    $terms[ ] = "($t)";
 
                     $bind = array_merge_recursive($bind, $b);
                 }
@@ -347,12 +345,12 @@ class SkinnySQL
                 $op = strtoupper($op);
 
                 $term = "$c $op ?";
-                array_push($bind, $v);
+                $bind[ ] = $v;
             }
         }
         else {
             $term = "$col = ?";
-            array_push($bind, $val);
+            $bind[ ] = $val;
         }
 
         return array($term, $bind, $col);
@@ -385,19 +383,19 @@ class SkinnySQL
                     list($term, $bind2, $col) = $this->mk_term($t2, $t[$t2]);
                     $this->where_values[$col] = $t[$t2];
 
-                    array_push($out2, $term);
-                    array_push($bind, $bind2);
+                    $out2[ ] = $term;
+                    $bind[ ] = $bind2;
                 }
 
                 $out1 .= '('.join(' AND ', $out2).')';
             }
             else if ($this->ref($t) == 'ARRAY') {
                 list($where, $bind2) = $this->parse_array_terms($t);
-                array_push($bind, $bind2);
+                $bind[ ] =  $bind2;
                 $out1 = '('.$where.')';
             }
 
-            array_push($out, ($out ? ' '.$logic.' ' : '').$out1);
+            $out[ ] = ($out ? ' '.$logic.' ' : '').$out1;
         }
 
         return array(join('', $out), $bind);
