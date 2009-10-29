@@ -402,6 +402,14 @@ class SkinnySQL
     }
 
 
+    function retrieve ( )
+    {
+        return $this->skinny->search_by_sql(
+            $this->as_sql, $this->bind, $this->from[0]
+        );
+    }
+
+
     private function ref ($val)
     {
         if ( !is_array($val) ) {
