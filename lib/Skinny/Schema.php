@@ -4,7 +4,7 @@
 // SkinnySchema based on DBIx::Skinny 0.04
 class SkinnySchema
 {
-    private $schema_info      = array( );  // -- Hash
+    public  $schema_info      = array( );  // -- Hash
     private $installing_table = null;      // -- String
     private $common_triggers  = array( );  // -- Array
     private $inflate_rules    = array( );  // -- Hash
@@ -91,9 +91,9 @@ class SkinnySchema
     }
 
 
-    function call_inflate ($args)
+    function call_inflate ($col, $data)
     {
-        return $this->do_inflate('inflate', $args);
+        return $this->do_inflate('inflate', $col, $data);
     }
 
 

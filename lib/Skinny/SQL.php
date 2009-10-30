@@ -111,7 +111,8 @@ class SkinnySQL
             $sql .= "\n";
         }
 
-        if ( !empty($this->joins) || !empty($this->from) ) {
+        if ( (!empty($this->joins) && $this->joins[0]) ||
+             (!empty($this->from)  && $this->from[0]) ) {
             $sql .= 'FROM ';
         }
 
@@ -445,7 +446,7 @@ class SkinnySQL
     function retrieve ( )
     {
         return $this->skinny[0]->search_by_sql(
-            $this->as_sql, $this->bind, $this->from[0]
+            $this->as_sql( ), $this->bind, $this->from[0]
         );
     }
 
