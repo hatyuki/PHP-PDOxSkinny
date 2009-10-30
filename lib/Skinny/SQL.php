@@ -148,11 +148,16 @@ class SkinnySQL
         }
 
         if ( !empty($this->from) ) {
+<<<<<<< HEAD
             $sql .= join(', ', array_map(array($this, '_add_index_hint'), $this->from));
         }
 
         if ( !preg_match("/\n$/", $sql) ) {
             $sql .= "\n";
+=======
+            // TODO: _add_index_hint
+            $sql .= join(', ', $this->from);
+>>>>>>> 1fe9a011cadde6917a2577bbdc9dad4485a299c6
         }
 
         $sql .= $this->as_sql_where( );
