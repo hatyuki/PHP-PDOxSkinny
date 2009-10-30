@@ -9,7 +9,6 @@ class SkinnySchema
     private $common_triggers  = array( );  // -- Array
     private $inflate_rules    = array( );  // -- Hash
     private $installing_rule  = null;      // -- String
-    private $mixins           = array( );  // -- Hash
 
 
     function install_table ($table, $install_code)

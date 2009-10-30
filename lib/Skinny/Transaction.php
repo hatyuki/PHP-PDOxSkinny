@@ -10,7 +10,7 @@ class SkinnyTransaction
 
     function __construct ($skinny)
     {
-        $this->status = false;
+        $this->status =  false;
         $this->skinny = $skinny;
 
         $skinny->txn_begin( );
