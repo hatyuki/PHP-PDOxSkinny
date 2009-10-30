@@ -194,10 +194,17 @@ class PDOxSkinny
     }
 
 
+    function close_sth ($sth)
+    {
+        $sth->closeCursor( );
+        $sth = null;
+    }
+
+
     /* ---------------------------------------------------------------
      * Schema Trigger Call
      */
-    function call_schema_trigger ($trigger, $schema, $table, $args)
+    function call_schema_trigger ($trigger, $schema, $table, $args=array( ))
     {
         $schema->call_trigger($this, $table, $trigger, $args);
     }
@@ -216,14 +223,12 @@ class PDOxSkinny
 
     function count ($table, $column='*', $where=array( ))
     {
-        $rs = $this->resultset(
-            array( 'from' => array($table) )
-        );
+        $rs = $this->resultset( array('from' => $table) );
 
         $rs->add_select( array("COUNT($column)" => 'cnt') );
         $this->add_where($rs, $where);
 
-        return $rs->retrieve( )->first( )->cnt;
+        return $rs->retrieve( )->first( )->cnt( );
     }
 
 
@@ -351,12 +356,12 @@ class PDOxSkinny
             $args[$col] = $schema->call_deflate($col, $val);
         }
 
-        $cols  = array( );
-        $binds = array( );
+        $cols = array( );
+        $bind = array( );
 
         foreach ($args as $col => $val) {
-            $cols[ ]  = $col;
-            $binds[ ] = $val;
+            $cols[ ] = $col;
+            $bind[ ] = $val;
         }
 
         $sql  = "INSERT INTO $table\n";
@@ -380,6 +385,27 @@ class PDOxSkinny
         $this->call_schema_trigger('post_insert', $schema, $table, $obj);
 
         return $obj;
+    }
+
+
+    function delete ($table, $where)
+    {
+        $schema = $this->schema;
+
+        $this->call_schema_trigger('pre_delete', $schema, $table, $where);
+
+        $stmt = $this->resultset( array('from' => $table) );
+        $this->add_where($stmt, $where);
+        $sql  = 'DELETE '.$stmt->as_sql( );
+        $this->profiler($sql, $stmt->bind( ));
+        $sth  = $this->execute($sql, $stmt->bind( ));
+
+        $this->call_schema_trigger('post_delete', $schema, $table);
+
+        $ret = $sth->rowCount( );
+        $this->close_sth($sth);
+
+        return $ret;
     }
 
 
@@ -423,6 +449,16 @@ class PDOxSkinny
     }
 
 
+    private function add_where ($stmt, $where)
+    {
+        foreach ($where as $col => $val) {
+            $stmt->add_where( array($col => $val) );
+        }
+
+        return $this;
+    }
+
+
     private function execute ($stmt, $bind)
     {
         try {
@@ -461,13 +497,6 @@ BIND    : %s
         $msg = sprintf($text, $reason, $stmt, $bind);
 
         die($msg);
-    }
-
-
-    function close_sth ($sth)
-    {
-        $sth->closeCursor( );
-        $sth = null;
     }
 
 
