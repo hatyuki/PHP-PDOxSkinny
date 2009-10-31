@@ -1,6 +1,5 @@
 <?php  // vim: ts=4 sts=4 sw=4
 require_once 'Skinny/Profiler.php';
-require_once 'Skinny/SQL.php';
 require_once 'Skinny/Iterator.php';
 
 

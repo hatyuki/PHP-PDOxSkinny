@@ -446,11 +446,7 @@ class SkinnySQL
     function retrieve ( )
     {
         return $this->skinny[0]->search_by_sql(
-<<<<<<< HEAD
             $this->as_sql( ), $this->bind, $this->from[0]
-=======
-            $this->as_sql, $this->bind, $this->from[0]
->>>>>>> f0097f98e728d20aa66224d29056c84b8e3bf529
         );
     }
 
