@@ -1,6 +1,11 @@
 This is PHP class PDOxSkinny based on DBIx::Skinny
 
-Perl の DBIx::Skinny を PHP に移植してみた版です。
+nekokak さんが開発されている Perl の DBIx::Skinny を
+PHP に移植してみた版です。
+
+本家の DBIx::Skinny は
+http://github.com/nekokak/p5-dbix-skinny
+
 自分が使うこと (PostgreSQL で動けばよい) を前提として開発しています。
 よって、抜けている機能も多々あります。
 また、テストがいいかげんなのでバグも多々あると思われます。
