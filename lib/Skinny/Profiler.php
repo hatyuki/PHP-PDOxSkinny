@@ -4,7 +4,7 @@
 // SkinnyProfiler based on DBIx::Skinny 0.04
 class SkinnyProfiler
 {
-    public $query_log = array( );
+    public $query_log = array( );  // -- Array
 
 
     function __construct ( )

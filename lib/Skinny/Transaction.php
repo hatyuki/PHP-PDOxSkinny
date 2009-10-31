@@ -4,13 +4,13 @@
 // SkinnyTransaction based on DBIx::Skinny 0.04
 class SkinnyTransaction
 {
-    private $status = false;
-    private $skinny = null;
+    private $status = false;  // -- Bool
+    private $skinny = null;   // -- Object
 
 
     function __construct ($skinny)
     {
-        $this->status = false;
+        $this->status =  false;
         $this->skinny = $skinny;
 
         $skinny->txn_begin( );

@@ -4,12 +4,11 @@
 // SkinnySchema based on DBIx::Skinny 0.04
 class SkinnySchema
 {
-    private $schema_info      = array( );  // -- Hash
+    public  $schema_info      = array( );  // -- Hash
     private $installing_table = null;      // -- String
     private $common_triggers  = array( );  // -- Array
     private $inflate_rules    = array( );  // -- Hash
     private $installing_rule  = null;      // -- String
-    private $mixins           = array( );  // -- Hash
 
 
     function install_table ($table, $install_code)
@@ -53,13 +52,17 @@ class SkinnySchema
     function call_trigger ($skinny, $table, $trigger_name, $args)
     {
         $common_triggers = $this->common_triggers[$trigger_name];
-        foreach ($common_triggers as $callback) {
-            call_user_func($callback, $skinny, $args, $table);
+        if ( !empty($common_triggers) ) {
+            foreach ($common_triggers as $callback) {
+                call_user_func($callback, $skinny, $args, $table);
+            }
         }
 
         $triggers = $this->schema_info[$table]['trigger'][$trigger_name];
-        foreach ($triggers as $callback) {
-            call_user_func($callback, $skinny, $args, $table);
+        if ( !empty($triggers) ) {
+            foreach ($triggers as $callback) {
+                call_user_func($callback, $skinny, $args, $table);
+            }
         }
     }
 
@@ -92,9 +95,9 @@ class SkinnySchema
     }
 
 
-    function call_inflate ($args)
+    function call_inflate ($col, $data)
     {
-        return $this->do_inflate('inflate', $args);
+        return $this->do_inflate('inflate', $col, $data);
     }
 
 

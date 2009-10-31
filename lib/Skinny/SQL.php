@@ -78,14 +78,17 @@ class SkinnySQL
     }
 
 
-    // -- TODO: MySQL
     function add_index_hint ($args)
     {
         list($table, $hint) = each($args);
 
         $this->index_hint[$table] = array(
-            'type' => empty($hint[type]) ? $hint[type] : 'USE',
-            'list' => $table,
+            'type' => empty($hint['type'])
+                    ? $hint['type']
+                    : 'USE',
+            'list' => is_array($hint['list'])
+                    ? $hint['list']
+                    : array($hint['list']),
         );
 
         return $this;
@@ -108,17 +111,22 @@ class SkinnySQL
             $sql .= "\n";
         }
 
-        $sql .= 'FROM ';
+        if ( (!empty($this->joins) && $this->joins[0]) ||
+             (!empty($this->from)  && $this->from[0]) ) {
+            $sql .= 'FROM ';
+        }
 
         if ( !empty($this->joins) ) {
+
             $initial_table_written = 0;
 
             foreach ($this->joins as $j) {
                 $table = $j['table'];
-                $joins = $j['joins'];
+                $joins = $this->ref($j['joins']) == 'HASH'
+                       ? array($j['joins'])
+                       : $j['joins'];
 
-                // TODO: _add_index_hint
-                // $table = $this->add_index_hint($table);
+                $table = $this->_add_index_hint($table);
 
                 if ( !$initial_table_written++ ) {
                     $sql .= $table;
@@ -140,11 +148,13 @@ class SkinnySQL
         }
 
         if ( !empty($this->from) ) {
-            // TODO: _add_index_hint
-            $sql .= join(', ', $this->from);
+            $sql .= join(', ', array_map(array($this, '_add_index_hint'), $this->from));
         }
 
-        $sql .= "\n";
+        if ( !preg_match("/\n$/", $sql) ) {
+            $sql .= "\n";
+        }
+
         $sql .= $this->as_sql_where( );
 
         $sql .= $this->as_aggregate('group');
@@ -274,6 +284,26 @@ class SkinnySQL
         $this->bind = array_merge_recursive($this->bind, $bind);
 
         return $this;
+    }
+
+
+    private function _add_index_hint ($tbl_name)
+    {
+        $hint = $this->index_hint[$tbl_name];
+
+        if ( !($hint && $this->ref($hint) == 'HASH') ) {
+            return $tbl_name;
+        }
+
+        if ( !empty($hint['list']) ) {
+            $retval  = $tbl_name.' ';
+            $retval .= $hint['type'] ? strtoupper($hint['type']) : 'USE';
+            $retval .= ' INDEX ('.join(', ', $hint['list']).')';
+
+            return $retval;
+        }
+
+        return $tbl_name;
     }
 
 
@@ -416,7 +446,11 @@ class SkinnySQL
     function retrieve ( )
     {
         return $this->skinny[0]->search_by_sql(
+<<<<<<< HEAD
+            $this->as_sql( ), $this->bind, $this->from[0]
+=======
             $this->as_sql, $this->bind, $this->from[0]
+>>>>>>> f0097f98e728d20aa66224d29056c84b8e3bf529
         );
     }
 

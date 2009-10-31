@@ -428,4 +428,68 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
         $obj->comment("G\\G");
         $this->assertEquals("SELECT foo\nFROM baz\n-- G", $obj->as_sql( ));
     }
+
+    function testCurrval ( )
+    {
+        $obj =& $this->class;
+
+        $obj->add_select("CURRVAL('foo_id_seq')");
+        $this->assertEquals("SELECT CURRVAL('foo_id_seq')\n", $obj->as_sql( ));
+    }
+
+    function testIndexHint ( )
+    {
+        $obj =& $this->class;
+
+        $obj->add_select( array('foo' => 'foo') );
+        $obj->from( array('baz') );
+        $this->assertEquals("SELECT foo\nFROM baz\n", $obj->as_sql( ));
+
+        $obj->add_index_hint( array(
+            'baz' => array(
+                'type' => 'USE',
+                'list' => array('index_hint')
+            )
+        ) );
+        $this->assertEquals("SELECT foo\nFROM baz USE INDEX (index_hint)\n", $obj->as_sql( ));
+    }
+
+    function testIndexHintWithJoins ( )
+    {
+        $obj =& $this->class;
+
+        $obj->add_select( array('foo' => 'foo') );
+        $obj->add_index_hint( array(
+            'baz' => array(
+                'type' => 'USE',
+                'list' => array('index_hint')
+            )
+        ) );
+        $obj->add_join( array(
+            'baz' => array(
+                'type'      => 'inner',
+                'table'     => 'baz',
+                'condition' => 'baz.baz_id = foo.baz_id',
+            )
+        ) );
+        $this->assertEquals("SELECT foo\nFROM baz USE INDEX (index_hint) INNER JOIN baz ON baz.baz_id = foo.baz_id\n", $obj->as_sql( ));
+
+        $obj->from( array( ) );
+        $obj->joins( array( ) );
+        $obj->add_join( array(
+            'baz' => array(
+                array(
+                    'type'      => 'inner',
+                    'table'     => 'baz b1',
+                    'condition' => 'baz.baz_id = b1.baz_id AND b1.quux_id = 1',
+                ),
+                array(
+                    'type'      => 'left',
+                    'table'     => 'baz b2',
+                    'condition' => 'baz.baz_id = b2.baz_id AND b2.quux_id = 2'
+                ),
+            )
+        ) );
+        $this->assertEquals("SELECT foo\nFROM baz USE INDEX (index_hint) INNER JOIN baz b1 ON baz.baz_id = b1.baz_id AND b1.quux_id = 1 LEFT JOIN baz b2 ON baz.baz_id = b2.baz_id AND b2.quux_id = 2\n", $obj->as_sql( ));
+    }
 }
