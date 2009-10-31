@@ -326,16 +326,6 @@ class PDOxSkinny
     }
 
 
-    private function get_sth_iterator ($sql, $sth, $opt_table_info)
-    {
-        return new SkinnyIterator( array(
-            'skinny'         => $this,
-            'sth'            => $sth,
-            'opt_table_info' => $opt_table_info,
-        ) );
-    }
-
-
     function data2itr ($table, $data)
     {
         return new SkinnyIterator( array(
@@ -409,6 +399,30 @@ class PDOxSkinny
     }
 
 
+    function delete_by_sql ($sql, $bind)
+    {
+        $this->profiler($sql, $bind);
+        $sth = $this->dbh->prepare($sql);
+        $ret = $sth->execute($bind);
+        $this->close_sth($sth);
+
+        return $ret;
+    }
+
+
+    function find_or_insert ($table, $args) { return $thiis->find_or_create($table, $args); }
+    function find_or_create ($table, $args)
+    {
+        $row = $this->single($table, $args);
+
+        if ($row) {
+            return $row;
+        }
+
+        return $this->insert($table, $args);
+    }
+
+
     private function dbd_type ($dsn)
     { 
         if ( !preg_match('/^(.+):/', $dsn, $m) ) {
@@ -425,6 +439,16 @@ class PDOxSkinny
         default:
             trigger_error('No Driver: '.$m[1], E_USER_ERROR);
         }
+    }
+
+
+    private function get_sth_iterator ($sql, $sth, $opt_table_info)
+    {
+        return new SkinnyIterator( array(
+            'skinny'         => $this,
+            'sth'            => $sth,
+            'opt_table_info' => $opt_table_info,
+        ) );
     }
 
 
@@ -486,7 +510,7 @@ class PDOxSkinny
         $bind = print_r($bind, true);
         $bind = preg_replace("/\n/", "\n          ", $bind);
 
-        $text = "Fatal error:
+        $text = "Trace Error:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@  PDOxSkinny 's Exception  @@@@@@
 Reason  : %s
@@ -496,7 +520,7 @@ BIND    : %s
 ";
         $msg = sprintf($text, $reason, $stmt, $bind);
 
-        die($msg);
+        trigger_error($msg, E_USER_ERROR);
     }
 
 
