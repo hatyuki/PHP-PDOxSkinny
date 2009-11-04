@@ -38,8 +38,8 @@ class PDOxSkinny
             $this->dbh = $args->dbh( );
             $this->dbd = $args->dbd( );
         }
-        else if ( !empty($connection_info) ) {
-            $this->connect_info($connection_info);
+        else if ( !empty($args) ) {
+            $this->connect_info($args);
             $this->reconnect( );
         }
     }
@@ -164,8 +164,8 @@ class PDOxSkinny
             $this->dbh = new PDO($this->dsn, $this->username, $this->password);
             $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            $auto_commit   = array_key_exists('AutoCommit', $this->connect_options)
-                           ? $this->connect_options['AutoCommit']
+            $auto_commit   = $this->connect_options['AutoCommit']
+                           ? true
                            : false;
 
             $on_connect_do = is_array($this->connect_options['on_connect_do'])
@@ -177,6 +177,10 @@ class PDOxSkinny
             }
 
             foreach ($on_connect_do as $sql) {
+                if ( empty($sql) ) {
+                    continue;
+                }
+
                 $this->query($sql);
             }
         }
@@ -214,6 +218,10 @@ class PDOxSkinny
      */
     function query ($sql)  // do method on DBIx::Skinny
     {
+        if ( empty($sql) ) {
+            return null;
+        }
+
         $this->profiler($sql);
 
         return $this->dbh->query($sql);

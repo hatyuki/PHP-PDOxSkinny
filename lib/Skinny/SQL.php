@@ -111,14 +111,16 @@ class SkinnySQL
             $sql .= "\n";
         }
 
-        if ( (!empty($this->joins) && $this->joins[0]) ||
-             (!empty($this->from)  && $this->from[0]) ) {
+        if ( !empty($this->joins) || !empty($this->from) ) {
             $sql .= 'FROM ';
         }
 
         if ( !empty($this->joins) ) {
-
             $initial_table_written = 0;
+
+            if ($this->ref($this->joins) == 'HASH') {
+                $this->joins = array($this->joins);
+            }
 
             foreach ($this->joins as $j) {
                 $table = $j['table'];
