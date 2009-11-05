@@ -48,10 +48,11 @@ class PDOxSkinny
     /* ---------------------------------------------------------------
      *  Reader
      */
-    function dbh       ( ) { return $this->dbh; }
-    function dbd       ( ) { return $this->dbd; }
-    function schema    ( ) { return $this->schema; }
-    function query_log ( ) { return $this->profiler->query_log; }
+    function dbh        ( ) { return $this->dbh; }
+    function dbd        ( ) { return $this->dbd; }
+    function schema     ( ) { return $this->schema; }
+    function query_log  ( ) { return $this->profiler->query_log; }
+    function txn_status ( ) { return $this->active_transaction; }
 
     function profiler ($sql, $bind=array( ))
     {
