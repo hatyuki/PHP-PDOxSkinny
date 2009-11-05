@@ -107,6 +107,6 @@ class SkinnyIterator
 
         $this->reset( );
 
-        return $rows;
+        return sizeof($rows);
     }
 }
