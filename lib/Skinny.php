@@ -161,28 +161,33 @@ class PDOxSkinny
             require_once "Skinny/DBD/$dbd_type.php";
             $dbd = 'SkinnyDriver'.$dbd_type;
 
-            $this->dbd = new $dbd( );
-            $this->dbh = new PDO($this->dsn, $this->username, $this->password);
-            $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            try {
+                $this->dbd = new $dbd( );
+                $this->dbh = new PDO($this->dsn, $this->username, $this->password);
+                $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            $auto_commit   = $this->connect_options['AutoCommit']
-                           ? true
-                           : false;
+                $auto_commit   = $this->connect_options['AutoCommit']
+                    ? true
+                    : false;
 
-            $on_connect_do = is_array($this->connect_options['on_connect_do'])
-                           ? $this->connect_options['on_connect_do']
-                           : array($this->connect_options['on_connect_do']);
+                $on_connect_do = is_array($this->connect_options['on_connect_do'])
+                    ? $this->connect_options['on_connect_do']
+                    : array($this->connect_options['on_connect_do']);
 
-            if ($auto_commit) {
-                $this->dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
-            }
-
-            foreach ($on_connect_do as $sql) {
-                if ( empty($sql) ) {
-                    continue;
+                if ($auto_commit) {
+                    $this->dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
                 }
 
-                $this->query($sql);
+                foreach ($on_connect_do as $sql) {
+                    if ( empty($sql) ) {
+                        continue;
+                    }
+
+                    $this->query($sql);
+                }
+            }
+            catch (Exception $e) {
+                trigger_error($e->getMessage( ), E_USER_ERROR);
             }
         }
 
