@@ -26,7 +26,7 @@ class SkinnyRow
             if ( !$this->get_column_cached[$col] ) {
                 $data = $this->get_column($col);
                 $this->get_column_cached[$col] =
-                    $this->skinny->schema( )->call_inflate($col, $data);
+                    $this->skinny->schema( )->call_inflate($col, &$data);
             }
         }
     }

@@ -49,10 +49,12 @@ class SkinnySchema
 
     function trigger ($trigger)
     {
-        foreach ($trigger as $trigger_name => $callback) {
-            $this->schema_info[
-                $this->installing_table
-            ]['trigger'][$trigger_name][ ] = $callback;
+        foreach ($trigger as $trigger_name => $cbs) {
+            foreach ($cbs as $callback) {
+                $this->schema_info[
+                    $this->installing_table
+                ]['trigger'][$trigger_name][ ] = $callback;
+            }
         }
     }
 
@@ -103,15 +105,15 @@ class SkinnySchema
     }
 
 
-    function call_inflate ($col, $data)
+    function call_inflate ($col, &$data)
     {
-        return $this->do_inflate('inflate', $col, $data);
+        return $this->do_inflate('inflate', $col, &$data);
     }
 
 
-    function call_deflate ($col, $data)
+    function call_deflate ($col, &$data)
     {
-        return $this->do_inflate('deflate', $col, $data);
+        return $this->do_inflate('deflate', $col, &$data);
     }
 
 
@@ -121,13 +123,13 @@ class SkinnySchema
     }
 
 
-    private function do_inflate ($key, $col, $data)
+    private function do_inflate ($key, $col, &$data)
     {
         $inflate_rules = $this->inflate_rules;
 
         foreach ($inflate_rules as $rule => $inflate) {
-            if ( preg_match($rule, $col) && array_key_exists($key, $inflate) ) {
-                $data = call_user_func($inflate[$key], $data);
+            if ( preg_match('/'.$rule.'/', $col) && array_key_exists($key, $inflate) ) {
+                $data = call_user_func($inflate[$key], &$data);
             }
         }
 

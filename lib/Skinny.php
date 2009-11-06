@@ -25,15 +25,15 @@ class PDOxSkinny
 
     function __construct ($args=array( ))
     {
-        $schema = get_class($this).'Schema';
+        $schema  = get_class($this).'Schema';
+        $profile = $args['profile']
+                 ? $args['profile']
+                 : $_SERVER['SKINNY_PROFILE'];
 
-        $this->schema             = new $schema;
-        $this->profiler           = new SkinnyProfiler( );
         $this->active_transaction = false;
-
-        $this->profile = ($_SERVER['SKINNY_PROFILE'] || $args['profile'])
-                       ? true
-                       : false;
+        $this->profile            = $profile;
+        $this->schema             = new $schema;
+        $this->profiler           = new SkinnyProfiler($profile);
 
         if ( is_a($args, 'PDOxSkinny') ) {
             $this->dbh = $args->dbh( );
@@ -361,7 +361,7 @@ class PDOxSkinny
         $this->call_schema_trigger('pre_insert', $schema, $table, $args);
 
         foreach ($args as $col => $val) {
-            $args[$col] = $schema->call_deflate($col, $val);
+            $args[$col] = $schema->call_deflate($col, &$val);
         }
 
         $cols = array( );

@@ -4,11 +4,17 @@
 // SkinnyProfiler based on DBIx::Skinny 0.04
 class SkinnyProfiler
 {
-    public $query_log = array( );  // -- Array
+    const LOG_STOCK = 1;
+    const LOG_PRINT = 2;
+    const LOG_WRITE = 4;
+
+    public  $query_log = array( );  // -- Array
+    private $mode      = 0;         // -- Int
 
 
-    function __construct ( )
+    function __construct ($mode=0)
     {
+        $this->mode = intval($mode);
         $this->reset( );
     }
 
@@ -29,7 +35,19 @@ class SkinnyProfiler
             ) );
         }
 
-        $this->query_log[ ] = $log;
+        if (SkinnyProfiler::LOG_STOCK & $this->mode) {
+            $this->query_log[ ] = $log;
+        }
+        if (SkinnyProfiler::LOG_PRINT & $this->mode) {
+            print $log."\n";
+        }
+        if (SkinnyProfiler::LOG_WRITE & $this->mode) {
+            $log_file = $_SERVER['SKINNY_LOG']
+                      ? $_SERVER['SKINNY_LOG']
+                      : getcwd( ).'/database.log';
+
+            error_log($log, 3, $log_file);
+        }
     }
 
 
