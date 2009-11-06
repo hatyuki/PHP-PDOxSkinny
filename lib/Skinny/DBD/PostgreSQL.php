@@ -11,6 +11,17 @@ class SkinnyDriverPostgreSQL
     function name_sep            ( ) { return '.'; }
 
 
+    function last_insert_id ($skinny, $table)
+    {
+        $schema = $skinny->schema( )->schema_info[$table];
+        $seq = $schema['seq']
+             ? $schema['seq']
+             : $table.'_'.$schema['pk'].'_seq';
+
+        return $skinny->dbh( )->lastInsertId($seq);
+    }
+
+
     function sql_for_unixtime ( )
     {
         return "TRUNC(EXTRACT('epoch' FROM NOW( )))";

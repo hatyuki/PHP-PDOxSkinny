@@ -12,19 +12,25 @@ class SkinnyDriverMySQL
     function sql_for_unixtime    ( ) { return "UNIX_TIMESTAMP( )"; }
 
 
-    function bulk_insert ($skinny, $table, $args)
+    function last_insert_id ($skinny, $table)
+    {
+        return $skinny->dbh( )->lastInsertId( );
+    }
+
+
+    function bulk_insert ($skinny, $table)
     {
         try {
-            $skinny->dbh->beginTransaction( );
+            $skinny->dbh( )->beginTransaction( );
 
             foreach ($args as $arg) {
                 $skinny->insert($table, $arg);
             }
 
-            $skinny->dbh->commit( );
+            $skinny->dbh( )->commit( );
         }
         catch (Exception $e) {
-            $skinny->dbh->rollback( );
+            $skinny->dbh( )->rollback( );
             trigger_error($e->getMessage( ), E_USER_ERROR);
         }
 

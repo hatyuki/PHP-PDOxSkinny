@@ -13,7 +13,7 @@ class SkinnyTransaction
         $this->status =  false;
         $this->skinny = $skinny;
 
-        $skinny->txn_begin( );
+        return $skinny->txn_begin( );
     }
 
 

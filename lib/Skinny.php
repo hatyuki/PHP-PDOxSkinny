@@ -1,6 +1,7 @@
 <?php  // vim: ts=4 sts=4 sw=4
 require_once 'Skinny/Profiler.php';
 require_once 'Skinny/Iterator.php';
+require_once 'Skinny/Transaction.php';
 
 
 // PDOxSkinny based on DBIx::Skinny 0.04
@@ -91,8 +92,6 @@ class PDOxSkinny
         } catch (Exception $e) {
             trigger_error($e->getMessage( ), E_USER_ERROR);
         }
-
-        return $this;
     }
 
 
@@ -213,9 +212,9 @@ class PDOxSkinny
     /* ---------------------------------------------------------------
      * Schema Trigger Call
      */
-    function call_schema_trigger ($trigger, $schema, $table, $args=array( ))
+    function call_schema_trigger ($trigger, $schema, &$table, &$args=array( ))
     {
-        $schema->call_trigger($this, $table, $trigger, $args);
+        $schema->call_trigger($this, &$table, $trigger, &$args);
     }
 
 
@@ -260,6 +259,10 @@ class PDOxSkinny
         $cols = $opt['select']
               ? $opt['select']
               : $this->schema->schema_info[$table]['columns'];
+
+        if ( empty($cols) ) {
+            $cols = array('*');
+        }
 
         $rs = $this->resultset( array(
             'select' => $cols,
@@ -377,7 +380,7 @@ class PDOxSkinny
         $pk  = $this->schema->schema_info[$table]['pk'];
 
         // Postgres で NG かもしれない
-        $id = isset($args[$pk]) ? $args[$pk] : $this->dbh->lastInsertId( );
+        $id = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
 
         $this->close_sth($sth);
 

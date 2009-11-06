@@ -31,6 +31,14 @@ class SkinnySchema
     }
 
 
+    function seq ($column)
+    {
+        $this->schema_info[
+            $this->installing_table
+        ]['seq'] = $column;
+    }
+
+
     function columns ($columns)
     {
         $this->schema_info[
@@ -49,19 +57,19 @@ class SkinnySchema
     }
 
 
-    function call_trigger ($skinny, $table, $trigger_name, $args)
+    function call_trigger ($skinny, &$table, $trigger_name, &$args)
     {
         $common_triggers = $this->common_triggers[$trigger_name];
         if ( !empty($common_triggers) ) {
             foreach ($common_triggers as $callback) {
-                call_user_func($callback, $skinny, $args, $table);
+                call_user_func($callback, $skinny, &$args, &$table);
             }
         }
 
         $triggers = $this->schema_info[$table]['trigger'][$trigger_name];
         if ( !empty($triggers) ) {
             foreach ($triggers as $callback) {
-                call_user_func($callback, $skinny, $args, $table);
+                call_user_func($callback, $skinny, &$args, &$table);
             }
         }
     }

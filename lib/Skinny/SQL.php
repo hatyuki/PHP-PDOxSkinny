@@ -241,6 +241,10 @@ class SkinnySQL
 
     function add_where ($args)
     {
+        if ( empty($args) ) {
+            return $this;
+        }
+
         list($col,  $val) = each($args);
         list($term, $bind, $tcol) = $this->mk_term($col, $val);
 
