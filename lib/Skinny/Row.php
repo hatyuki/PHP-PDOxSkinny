@@ -8,6 +8,7 @@ class SkinnyRow
     private $row_data          = array( );  // -- Hash
     private $get_column_cached = array( );  // -- Hash
     private $dirty_columns     = false;     // -- Bool
+    private $opt_table_info    = null;      // -- Str
     private $skinny            = null;      // -- Object
 
 
@@ -15,6 +16,7 @@ class SkinnyRow
     {
         $this->select_columns    = array_keys($args['row_data']);
         $this->row_data          = $args['row_data'];
+        $this->opt_table_info    = $args['opt_table_info'];
         $this->skinny            = $args['skinny'];
         $this->dirty_columns     = array( );
 
@@ -64,7 +66,7 @@ class SkinnyRow
     {
         foreach ($args as $col => $val) {
             $this->row_data[$col] =
-                $this->skinny->schema->call_deflate($col, $val);
+                $this->skinny->schema( )->call_deflate($col, $val);
             $this->get_column_cached[$col] = $val;
             $this->dirty_columns[$col] = true;
         }
@@ -107,7 +109,7 @@ class SkinnyRow
     }
 
 
-    function delete ($table)
+    function delete ($table=null)
     {
         $table = $table ? $table : $this->opt_table_info;
 
@@ -123,7 +125,7 @@ class SkinnyRow
             trigger_error('no table info', E_USER_ERROR);
         }
 
-        $schema_info = $this->skinny->schema->schema_info;
+        $schema_info = $this->skinny->schema( )->schema_info;
 
         if ( !$schema_info[$table] ) {
             trigger_error("unknown table: $table", E_USER_ERROR);
@@ -135,10 +137,10 @@ class SkinnyRow
             trigger_error("$table have no pk", E_USER_ERROR);
         }
 
-        if ( !array_search($pk, $this->select_columns) ) {
+        if ( array_search($pk, $this->select_columns) === false) {
             trigger_error("can't get primary column in your query", E_USER_ERROR);
         }
 
-        return array($pk => $this->$pk);
+        return array($pk => $this->$pk( ));
     }
 }
