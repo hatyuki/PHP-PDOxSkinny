@@ -105,15 +105,15 @@ class SkinnySchema
     }
 
 
-    function call_inflate ($col, &$data)
+    function call_inflate ($col, $data)
     {
-        return $this->do_inflate('inflate', $col, &$data);
+        return $this->do_inflate('inflate', $col, $data);
     }
 
 
-    function call_deflate ($col, &$data)
+    function call_deflate ($col, $data)
     {
-        return $this->do_inflate('deflate', $col, &$data);
+        return $this->do_inflate('deflate', $col, $data);
     }
 
 
@@ -123,13 +123,13 @@ class SkinnySchema
     }
 
 
-    private function do_inflate ($key, $col, &$data)
+    private function do_inflate ($key, $col, $data)
     {
         $inflate_rules = $this->inflate_rules;
 
         foreach ($inflate_rules as $rule => $inflate) {
             if ( preg_match('/'.$rule.'/', $col) && array_key_exists($key, $inflate) ) {
-                $data = call_user_func($inflate[$key], &$data);
+                $data = call_user_func($inflate[$key], $data);
             }
         }
 

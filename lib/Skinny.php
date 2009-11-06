@@ -361,7 +361,7 @@ class PDOxSkinny
         $this->call_schema_trigger('pre_insert', $schema, $table, $args);
 
         foreach ($args as $col => $val) {
-            $args[$col] = $schema->call_deflate($col, &$val);
+            $args[$col] = $schema->call_deflate($col, $val);
         }
 
         $cols = array( );
