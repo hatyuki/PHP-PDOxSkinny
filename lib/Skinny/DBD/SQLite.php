@@ -12,6 +12,12 @@ class SkinnyDriverSQLite
     function sql_for_unixtime    ( ) { return time( ); }
 
 
+    function last_insert_id ($skinny, $table)
+    {
+        return $skinny->dbh( )->lastInsertId( );
+    }
+
+
     function bulk_insert ($skinny, $table, $args)
     {
         try {

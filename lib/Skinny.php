@@ -92,6 +92,8 @@ class PDOxSkinny
         } catch (Exception $e) {
             trigger_error($e->getMessage( ), E_USER_ERROR);
         }
+
+        return $this;
     }
 
 
