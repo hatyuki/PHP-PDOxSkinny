@@ -1,13 +1,10 @@
 <?php  // vim: ts=4 sts=4 sw=4
+require_once 'Skinny.php';
 
 
 // SkinnyProfiler based on DBIx::Skinny 0.04
 class SkinnyProfiler
 {
-    const LOG_STOCK = 1;
-    const LOG_PRINT = 2;
-    const LOG_WRITE = 4;
-
     public  $query_log = array( );  // -- Array
     private $mode      = 0;         // -- Int
 
@@ -35,13 +32,13 @@ class SkinnyProfiler
             ) );
         }
 
-        if (SkinnyProfiler::LOG_STOCK & $this->mode) {
+        if (Skinny::LOG_TRACE & $this->mode) {
             $this->query_log[ ] = $log;
         }
-        if (SkinnyProfiler::LOG_PRINT & $this->mode) {
+        if (Skinny::LOG_PRINT & $this->mode) {
             print $log."\n";
         }
-        if (SkinnyProfiler::LOG_WRITE & $this->mode) {
+        if (Skinny::LOG_WRITE & $this->mode) {
             $log_file = $_SERVER['SKINNY_LOG']
                       ? $_SERVER['SKINNY_LOG']
                       : getcwd( ).'/database.log';

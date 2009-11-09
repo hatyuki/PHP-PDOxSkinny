@@ -4,6 +4,15 @@ require_once 'Skinny/Iterator.php';
 require_once 'Skinny/Transaction.php';
 
 
+class Skinny
+{
+    // for SkinnyProfiler
+    const LOG_TRACE = 1;
+    const LOG_PRINT = 2;
+    const LOG_WRITE = 4;
+}
+
+
 // PDOxSkinny based on DBIx::Skinny 0.04
 class PDOxSkinny
 {
@@ -26,20 +35,22 @@ class PDOxSkinny
     function __construct ($args=array( ))
     {
         $schema  = get_class($this).'Schema';
-        $profile = $args['profile']
-                 ? $args['profile']
-                 : $_SERVER['SKINNY_PROFILE'];
-
         $this->active_transaction = false;
-        $this->profile            = $profile;
         $this->schema             = new $schema;
-        $this->profiler           = new SkinnyProfiler($profile);
 
         if ( is_a($args, 'PDOxSkinny') ) {
-            $this->dbh = $args->dbh( );
-            $this->dbd = $args->dbd( );
+            $this->dbh      = $args->dbh( );
+            $this->dbd      = $args->dbd( );
+            $this->profile  = $args->profile( );
+            $this->profiler = new SkinnyProfiler($this->profile);
         }
         else if ( !empty($args) ) {
+            $profile = $args['profile']
+                     ? $args['profile']
+                     : $_SERVER['SKINNY_PROFILE'];
+            $this->profile  = $profile;
+            $this->profiler = new SkinnyProfiler($this->profile);
+
             $this->connect_info($args);
             $this->reconnect( );
         }
@@ -54,7 +65,12 @@ class PDOxSkinny
     function schema     ( ) { return $this->schema; }
     function query_log  ( ) { return $this->profiler->query_log; }
     function txn_status ( ) { return $this->active_transaction; }
+    function profile    ( ) { return $this->profile; }
 
+
+    /* ---------------------------------------------------------------
+     *  Profile
+     */
     function profiler ($sql, $bind=array( ))
     {
         if ($this->profile && $sql) {
@@ -63,8 +79,6 @@ class PDOxSkinny
 
         return $this->profiler;
     }
-
-
 
 
     /* ---------------------------------------------------------------
@@ -167,7 +181,7 @@ class PDOxSkinny
                 $this->dbh = new PDO($this->dsn, $this->username, $this->password);
                 $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                $auto_commit   = $this->connect_options['AutoCommit']
+                $auto_commit = $this->connect_options['AutoCommit']
                     ? true
                     : false;
 
@@ -355,7 +369,8 @@ class PDOxSkinny
 
 
     function create ($table, $args) { return $this->insert($table, $args); }
-    function insert ($table, $args) {
+    function insert ($table, $args)
+    {
         $schema = $this->schema;
 
         $this->call_schema_trigger('pre_insert', $schema, $table, $args);
@@ -380,9 +395,7 @@ class PDOxSkinny
 
         $sth = $this->execute($sql, $bind);
         $pk  = $this->schema->schema_info[$table]['pk'];
-
-        // Postgres で NG かもしれない
-        $id = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
+        $id  = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
 
         $this->close_sth($sth);
 
@@ -393,6 +406,80 @@ class PDOxSkinny
         $this->call_schema_trigger('post_insert', $schema, $table, $obj);
 
         return $obj;
+    }
+
+
+    function bulk_insert ($table, $args)
+    {
+        if ( method_exists($this->dbd, 'bulk_insert') ) {
+            return $this->dbd->bulk_insert($table, $args);
+        }
+        else {
+            trigger_error("dbd don't provide bulk_insert method", E_USER_ERROR);
+        }
+    }
+
+
+    function update ($table, $args, $where)
+    {
+        $schema = $this->schema;
+        $this->call_schema_trigger('pre_update', $schema, $table, $args);
+
+        $values = array( );
+
+        foreach ($args as $col => $val) {
+            $values[$col] = $schema->call_deflate($col, $val);
+        }
+
+        $quote    = $this->dbd->quote( );
+        $name_sep = $this->dbd->name_sep( );
+        $set      = array( );
+        $bind     = array( );
+
+        foreach ($values as $col => $val) {
+            $quoted_col = $this->quote($col, $quote, $name_sep);
+
+            if ( $this->ref($val) == 'ARRAY' && array_key_exists('-inject', $val) ) {
+                $set[ ] = "$quoted_col = $val";
+            }
+            else if ($this->ref($val) == 'SCALAR') {
+                $set[ ]  = "$quoted_col = ?";
+                $bind[ ] = $values;
+            }
+            else {
+                $dump = print_r($val, true);
+                trigger_error("could not parse value: $dump", E_USER_ERROR);
+            }
+        }
+
+        $stmt = $this->resultset( );
+        $this->add_where($stmt, $where);
+        $bind = array_merge_recursive($bind, $stmt->bind( ));
+
+        $sql = "UPDATE $table SET ".join(', ', $set).' '.$stmt->as_sql_where( );
+
+        $this->profiler($sql, $bind);
+
+        $sth  = $this->dbh->prepare($sql);
+        $rows = $sth->execute($bind);
+
+        $this->close_sth($sth);
+        $this->call_schema_trigger('post_update', $schema, $table, $rows);
+
+        return $rows;
+    }
+
+
+    function update_by_sql ($sql, $bind)
+    {
+        $this->profiler($sql, $bind);
+
+        $sth  = $this->dbh->prepare($sql);
+        $rows = $sth->execute($bind);
+
+        $this->close_sth($sth);
+
+        return $rows;
     }
 
 
@@ -442,7 +529,7 @@ class PDOxSkinny
 
 
     private function dbd_type ($dsn)
-    { 
+    {
         if ( !preg_match('/^(.+):/', $dsn, $m) ) {
             trigger_error('unknown db type', E_USER_ERROR);
         }

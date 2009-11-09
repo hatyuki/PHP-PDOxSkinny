@@ -385,7 +385,7 @@ class SkinnySQL
                 $term = "$c $op (? AND ?)";
                 $bind = $v;
             }
-            else if ($op == 'inject') {
+            else if ($op == '-inject') {
                 $term = $col.' '.$val[$op];
             }
             else {
