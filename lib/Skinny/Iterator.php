@@ -9,6 +9,7 @@ class SkinnyIterator
     private $sth            = null;      // -- Object
     private $data           = null;      // -- Array
     private $opt_table_info = null;      // -- Str?
+    private $row_class      = null;      // -- Str
     private $potision       = 0;         // -- Int
     private $rows_cache     = array( );  // -- Array
 
@@ -56,11 +57,21 @@ class SkinnyIterator
             return $row;
         }
 
-        $obj = new SkinnyRow( array(
+
+        $args = array(
             'row_data'       => $row,
             'skinny'         => $this->skinny,
             'opt_table_info' => $this->opt_table_info,
-        ) );
+        );
+
+
+        if ( class_exists($this->row_class) ) {
+            $class = $this->row_class;
+            $obj = new $class($args);
+        } 
+        else {
+            $obj = new SkinnyRow($args);
+        }
 
         $this->rows_cache[$potision] = $obj;
         $this->potition = $potition;

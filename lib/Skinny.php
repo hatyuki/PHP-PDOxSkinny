@@ -6,18 +6,20 @@ require_once 'Skinny/Transaction.php';
 
 class Skinny
 {
+    const VERSION   = 0.04;
+
     // for SkinnyProfiler
     const TRACE_LOG = 1;
     const PRINT_LOG = 2;
     const WRITE_LOG = 4;
 }
 
+class SkinnyException extends Exception { }
+
 
 // PDOxSkinny based on DBIx::Skinny 0.04
 class PDOxSkinny
 {
-    public $VERSION = 0.04;
-
     private $dsn                = null;      // -- String
     private $username           = null;      // -- String
     private $password           = null;      // -- String
@@ -367,6 +369,7 @@ class PDOxSkinny
         return new SkinnyIterator( array(
             'skinny'         => $this,
             'data'           => $data,
+            'row_class'      => $this->mk_row_class($table),
             'opt_table_info' => $table,
         ) );
     }
@@ -553,11 +556,40 @@ class PDOxSkinny
 
     private function get_sth_iterator ($sql, $sth, $opt_table_info)
     {
+        $table = $this->guess_table_name($sql);
+
         return new SkinnyIterator( array(
             'skinny'         => $this,
             'sth'            => $sth,
+            'row_class'      => $this->mk_row_class($table),
             'opt_table_info' => $opt_table_info,
         ) );
+    }
+
+
+    private function guess_table_name ($sql)
+    {
+        $sql = str_replace(array("\r\n", "\n", "\r"), ' ', $sql);
+
+        if ( preg_match('/^.+from\s+([\w]+)\s*/i', $sql, $m) ) {
+            return $m[1];
+        }
+
+        return '';
+    }
+
+
+    private function mk_row_class ($table)
+    {
+        return empty($table)
+             ? 'SkinnyRow'
+             : get_class($this).$this->camelize($table);
+    }
+
+
+    private function camelize ($str)
+    {
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', $str)));
     }
 
 
