@@ -12,7 +12,14 @@ class Skinny
     const TRACE_LOG = 1;
     const PRINT_LOG = 2;
     const WRITE_LOG = 4;
+
+    // for Exception
+    const SKINNY_EXCEPTION  = 400;
+    const BULK_INSERT_ERROR = 401;
+    const CONNECT_ERROR     = 402;
+    const EXECUTE_ERROR     = 403;
 }
+
 
 class SkinnyException extends Exception { }
 
@@ -29,9 +36,11 @@ class PDOxSkinny
     private $schema             = null;      // -- Object[SkinnySchema]
     private $profiler           = null;      // -- Object[SkinnyProfiler]
     private $profile            = false;     // -- Bool
-    private $row_class_map      = array( );  // -- Hash
     private $active_transaction = false;     // -- Bool
     private $mixins             = array( );  // -- Hash
+    private $is_error           = false;     // -- Bool
+    private $error_msg          = null;      // -- Str
+    private $raise_error        = false;     // -- Bool
 
 
     function __construct ($args=array( ))
@@ -41,12 +50,17 @@ class PDOxSkinny
         $this->schema             = new $schema;
 
         if ( is_a($args, 'PDOxSkinny') ) {
-            $this->dbh      = $args->dbh( );
-            $this->dbd      = $args->dbd( );
-            $this->profile  = $args->profile( );
-            $this->profiler = new SkinnyProfiler($this->profile);
+            $this->dbh         = $args->dbh( );
+            $this->dbd         = $args->dbd( );
+            $this->raise_error = $args->raise_error( );
+            $this->profile     = $args->profile( );
+            $this->profiler    = new SkinnyProfiler($this->profile);
         }
         else if ( !empty($args) ) {
+            $this->raise_error = $args['raise_error']
+                               ? true
+                               : false;
+
             $profile = $args['profile']
                      ? $args['profile']
                      : $_SERVER['SKINNY_PROFILE'];
@@ -62,12 +76,15 @@ class PDOxSkinny
     /* ---------------------------------------------------------------
      *  Reader
      */
-    function dbh        ( ) { return $this->dbh; }
-    function dbd        ( ) { return $this->dbd; }
-    function schema     ( ) { return $this->schema; }
-    function query_log  ( ) { return $this->profiler->query_log; }
-    function txn_status ( ) { return $this->active_transaction; }
-    function profile    ( ) { return $this->profile; }
+    function dbh         ( ) { return $this->dbh; }
+    function dbd         ( ) { return $this->dbd; }
+    function schema      ( ) { return $this->schema; }
+    function query_log   ( ) { return $this->profiler->query_log; }
+    function txn_status  ( ) { return $this->active_transaction; }
+    function profile     ( ) { return $this->profile; }
+    function is_error    ( ) { return $this->is_error; }
+    function raise_error ( ) { return $this->raise_error; }
+    function get_err_msg ( ) { return $this->error_msg; }
 
 
     /* ---------------------------------------------------------------
@@ -90,7 +107,7 @@ class PDOxSkinny
     {
         if ( $this->active_transaction ) {
             trigger_error(
-                "The 'txn_scope' method can not be performed during a transaction.",
+                "The 'txn_scope' method can not be performed during a transaction",
                 E_USER_ERROR
             );
         }
@@ -103,13 +120,7 @@ class PDOxSkinny
     {
         $this->active_transaction = true;
 
-        try {
-            $this->dbh->beginTransaction( );
-        } catch (Exception $e) {
-            trigger_error($e->getMessage( ), E_USER_ERROR);
-        }
-
-        return $this;
+        return $this->dbh->beginTransaction( );
     }
 
 
@@ -119,11 +130,7 @@ class PDOxSkinny
             return false;
         }
 
-        try {
-            $this->dbh->rollback( );
-        } catch (Exception $e) {
-            trigger_error($e->getMessage( ), E_USER_ERROR);
-        }
+        $this->dbh->rollback( );
 
         return $this->txn_end( );
     }
@@ -135,11 +142,7 @@ class PDOxSkinny
             return false;
         }
 
-        try {
-            $this->dbh->commit( );
-        } catch (Exception $e) {
-            trigger_error($e->getMessage( ), E_USER_ERROR);
-        }
+        $this->dbh->commit( );
 
         return $this->txn_end( );
     }
@@ -179,6 +182,9 @@ class PDOxSkinny
             $dbd = 'SkinnyDriver'.$dbd_type;
 
             try {
+                $this->is_error  = false;
+                $this->error_msg = null;
+
                 $this->dbd = new $dbd( );
                 $this->dbh = new PDO($this->dsn, $this->username, $this->password);
                 $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -204,7 +210,14 @@ class PDOxSkinny
                 }
             }
             catch (Exception $e) {
-                trigger_error($e->getMessage( ), E_USER_ERROR);
+                $this->is_error  = true;
+                $this->error_msg = $e->toString( );
+
+                if ($this->raise_error) {
+                    throw new SkinnyException(
+                        $e->getMessage( ), Skinny::CONNECT_ERROR
+                    );
+                }
             }
         }
 
@@ -419,7 +432,21 @@ class PDOxSkinny
     function bulk_insert ($table, $args)
     {
         if ( method_exists($this->dbd, 'bulk_insert') ) {
-            return $this->dbd->bulk_insert($table, $args);
+            try {
+                $this->is_error  = false;
+                $this->error_msg = null;
+                $this->dbd->bulk_insert($table, $args);
+            }
+            catch (Exception $e) {
+                $this->is_error  = true;
+                $this->error_msg = $e->toString( );
+
+                if ($this->raise_error) {
+                    throw new SkinnyException(
+                        $e->getMessage( ), Skinny::BULK_INSERT_ERROR
+                    );
+                }
+            }
         }
         else {
             trigger_error("dbd don't provide bulk_insert method", E_USER_ERROR);
@@ -626,7 +653,11 @@ class PDOxSkinny
 
     private function execute ($stmt, $bind)
     {
+        $this->is_error  = false;
+        $this->error_msg = null;
+
         try {
+
             $sth = $this->dbh->prepare($stmt);
             $sth->execute($bind);
         }
@@ -652,16 +683,20 @@ class PDOxSkinny
         $bind = preg_replace("/\n/", "\n          ", $bind);
 
         $text = "Trace Error:
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@@@@@  PDOxSkinny 's Exception  @@@@@@
+***************************  PDOxSkinny's Exception  ***************************
 Reason  : %s
 SQL     : %s
 BIND    : %s
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+--------------------------------------------------------------------------------
 ";
         $msg = sprintf($text, $reason, $stmt, $bind);
 
-        trigger_error($msg, E_USER_ERROR);
+        $this->is_error  = true;
+        $this->error_msg = $msg;
+
+        if ($this->raise_error) {
+            throw new SkinnyException($msg, Skinny::EXECUTE_ERROR);
+        }
     }
 
 
@@ -697,7 +732,7 @@ BIND    : %s
             return call_user_func($func, $args);
         }
 
-        trigger_error('Call to undefinded function: '.$method, E_USER_ERROR);
+        trigger_error("Call to undefinded function: $method", E_USER_ERROR);
     }
 
 

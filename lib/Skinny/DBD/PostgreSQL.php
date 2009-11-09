@@ -41,7 +41,7 @@ class SkinnyDriverPostgreSQL
         }
         catch (Exception $e) {
             $skinny->dbh->rollback( );
-            trigger_error($e->getMessage( ), E_USER_ERROR);
+            throw new Exception($e->getMessage( ));
         }
 
         return true;
