@@ -24,7 +24,7 @@ class SkinnyProfiler
 
     function record_query ($sql, $bind=array( ))
     {
-        $log = $this->normalize($sql);
+        $log  = $this->normalize($sql);
 
         if ( sizeof($bind) != 0) {
             $log .= ' :binds '.join(', ', array_map(
@@ -36,14 +36,15 @@ class SkinnyProfiler
             $this->query_log[ ] = $log;
         }
         if (Skinny::PRINT_LOG & $this->mode) {
-            print $log."\n";
+            print '[DEBUG] '.$log."\n";
         }
         if (Skinny::WRITE_LOG & $this->mode) {
+            $date     = date('[Y-m-d H:i:s] ');
             $log_file = $_SERVER['SKINNY_LOG']
                       ? $_SERVER['SKINNY_LOG']
                       : getcwd( ).'/database.log';
 
-            error_log($log, 3, $log_file);
+            error_log($date.$log."\n", 3, $log_file);
         }
     }
 

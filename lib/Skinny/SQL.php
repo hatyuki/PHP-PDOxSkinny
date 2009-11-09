@@ -382,10 +382,10 @@ class SkinnySQL
             else if ( ($op == 'between' || $op == 'not between') && $this->ref($v) == 'ARRAY') {
                 $op = strtoupper($op);
 
-                $term = "$c $op (? AND ?)";
+                $term = "$c $op ? AND ?";
                 $bind = $v;
             }
-            else if ($op == '-inject') {
+            else if ($op == 'inject') {
                 $term = $col.' '.$val[$op];
             }
             else {

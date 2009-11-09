@@ -36,7 +36,7 @@ class SkinnyRow
     {
         $col = $this->get_column_cached[$name];
 
-        if ( !$col ) {
+        if ( !in_array($name, $this->select_columns) ) {
             trigger_error("unknown column: $name", E_USER_ERROR);
         }
 

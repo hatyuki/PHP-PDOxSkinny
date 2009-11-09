@@ -358,7 +358,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
         $obj->add_where( array('foo' => array('between' => array(1, 100))) );
         $bind = $obj->bind( );
 
-        $this->assertEquals("WHERE (foo BETWEEN (? AND ?))\n", $obj->as_sql_where( ));
+        $this->assertEquals("WHERE (foo BETWEEN ? AND ?)\n", $obj->as_sql_where( ));
         $this->assertEquals(sizeof($bind), 2);
         $this->assertEquals($bind[0], 1);
         $this->assertEquals($bind[1], 100);

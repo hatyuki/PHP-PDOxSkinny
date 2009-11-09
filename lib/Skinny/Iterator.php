@@ -38,7 +38,7 @@ class SkinnyIterator
             if ( !$row ) {
                 $this->skinny->close_sth($this->sth);
                 $this->sth = null;
-                return ;
+                return null;
             }
         }
         else if ($this->data && is_array($this->data) ) {

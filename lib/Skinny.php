@@ -256,7 +256,11 @@ class PDOxSkinny
         $rs->add_select( array("COUNT($column)" => 'cnt') );
         $this->add_where($rs, $where);
 
-        return $rs->retrieve( )->first( )->cnt( );
+        $res = $rs->retrieve( )->first( );
+
+        return $res
+             ? $res->cnt( )
+             : 0;
     }
 
 
@@ -439,7 +443,7 @@ class PDOxSkinny
         foreach ($values as $col => $val) {
             $quoted_col = $this->quote($col, $quote, $name_sep);
 
-            if ( $this->ref($val) == 'ARRAY' && array_key_exists('-inject', $val) ) {
+            if ( $this->ref($val) == 'ARRAY' && array_key_exists('inject', $val) ) {
                 $set[ ] = "$quoted_col = $val";
             }
             else if ($this->ref($val) == 'SCALAR') {
