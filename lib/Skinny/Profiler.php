@@ -32,13 +32,13 @@ class SkinnyProfiler
             ) );
         }
 
-        if (Skinny::LOG_TRACE & $this->mode) {
+        if (Skinny::TRACE_LOG & $this->mode) {
             $this->query_log[ ] = $log;
         }
-        if (Skinny::LOG_PRINT & $this->mode) {
+        if (Skinny::PRINT_LOG & $this->mode) {
             print $log."\n";
         }
-        if (Skinny::LOG_WRITE & $this->mode) {
+        if (Skinny::WRITE_LOG & $this->mode) {
             $log_file = $_SERVER['SKINNY_LOG']
                       ? $_SERVER['SKINNY_LOG']
                       : getcwd( ).'/database.log';

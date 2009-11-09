@@ -7,9 +7,9 @@ require_once 'Skinny/Transaction.php';
 class Skinny
 {
     // for SkinnyProfiler
-    const LOG_TRACE = 1;
-    const LOG_PRINT = 2;
-    const LOG_WRITE = 4;
+    const TRACE_LOG = 1;
+    const PRINT_LOG = 2;
+    const WRITE_LOG = 4;
 }
 
 
