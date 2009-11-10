@@ -8,7 +8,7 @@ class SkinnyIterator
     private $skinny         = null;      // -- Object
     private $sth            = null;      // -- Object
     private $data           = null;      // -- Array
-    private $opt_table_info = null;      // -- Str?
+    private $opt_table_info = null;      // -- Str
     private $row_class      = null;      // -- Str
     private $potision       = 0;         // -- Int
     private $rows_cache     = array( );  // -- Array
@@ -74,7 +74,7 @@ class SkinnyIterator
         }
 
         $this->rows_cache[$potision] = $obj;
-        $this->potition = $potition;
+        $this->potision = $potision;
 
         return $obj;
     }
@@ -96,6 +96,8 @@ class SkinnyIterator
 
     function all ( )
     {
+        $this->reset( );
+
         while ( $row = $this->next( ) ) {
             $result[ ] = $row;
         }
@@ -104,9 +106,29 @@ class SkinnyIterator
     }
 
 
+    function all_as_hash ( )
+    {
+        $this->reset( );
+
+        while ( $row = $this->next( ) ) {
+            if ( !$columns ) {
+                $columns = $row->select_columns( );
+            }
+
+            foreach ($columns as $col) {
+                $r[$col] = $row->get_column($col);
+            }
+
+            $result[ ] = $r;
+        }
+
+        return $result;
+    }
+
+
     function reset ( )
     {
-        $this->potition = 0;
+        $this->potision = 0;
 
         return $this;
     }

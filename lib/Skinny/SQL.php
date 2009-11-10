@@ -17,7 +17,6 @@ class SkinnySQL
     private $having             = array( );  // -- Array
     private $where_values       = array( );  // -- Hash
     private $index_hint         = array( );  // -- Hash
-    private $column_mutator     = null;      // -- ???
     private $limit              = null;      // -- Int
     private $offset             = null;      // -- Int
     private $comment            = null;      // -- Str
@@ -333,7 +332,6 @@ class SkinnySQL
     }
 
 
-    // TODO: column_mutator ???
     private function mk_term ($col, $val)
     {
         $term = '';

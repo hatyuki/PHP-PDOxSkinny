@@ -119,6 +119,9 @@ class SkinnyRow
     }
 
 
+    function select_columns ( ) { return $this->select_columns; }
+
+
     private function update_or_delete_cond ($table)
     {
         if ( !$table ) {

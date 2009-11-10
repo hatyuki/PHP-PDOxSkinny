@@ -6,7 +6,7 @@ require_once 'Skinny/Transaction.php';
 
 class Skinny
 {
-    const VERSION   = 0.04;
+    const VERSION = 0.04;
 
     // for SkinnyProfiler
     const TRACE_LOG = 1;
@@ -27,9 +27,9 @@ class SkinnyException extends Exception { }
 // PDOxSkinny based on DBIx::Skinny 0.04
 class PDOxSkinny
 {
-    private $dsn                = null;      // -- String
-    private $username           = null;      // -- String
-    private $password           = null;      // -- String
+    private $dsn                = null;      // -- Str
+    private $username           = null;      // -- Str
+    private $password           = null;      // -- Str
     private $connect_options    = array( );  // -- Hash
     private $dbh                = null;      // -- Object[PDO]
     private $dbd                = null;      // -- Object
@@ -88,7 +88,7 @@ class PDOxSkinny
 
 
     /* ---------------------------------------------------------------
-     *  Profile
+     *  Profiler
      */
     function profiler ($sql, $bind=array( ))
     {
@@ -241,7 +241,7 @@ class PDOxSkinny
 
 
     /* ---------------------------------------------------------------
-     * Schema Trigger Call
+     * Schema Trigger
      */
     function call_schema_trigger ($trigger, $schema, &$table, &$args=array( ))
     {
@@ -610,7 +610,7 @@ class PDOxSkinny
     {
         return empty($table)
              ? 'SkinnyRow'
-             : get_class($this).$this->camelize($table);
+             : get_class($this).'Row'.$this->camelize($table);
     }
 
 
