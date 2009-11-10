@@ -45,6 +45,9 @@ class SkinnySQL
     }
 
 
+    function bind ( ) { return $this->bind; }
+
+
     function add_select ($term, $col=null)
     {
         if ( is_array($term) ) {

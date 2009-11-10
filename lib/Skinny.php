@@ -49,6 +49,10 @@ class PDOxSkinny
         $this->active_transaction = false;
         $this->schema             = new $schema;
 
+        if ( method_exists($this->schema, 'register_schema') ) {
+            $this->schema->register_schema( );
+        }
+
         if ( is_a($args, 'PDOxSkinny') ) {
             $this->dbh         = $args->dbh( );
             $this->dbd         = $args->dbd( );
@@ -254,13 +258,28 @@ class PDOxSkinny
      */
     function query ($sql)  // do method on DBIx::Skinny
     {
+        $this->is_error  = false;
+        $this->error_msg = null;
+
         if ( empty($sql) ) {
             return null;
         }
 
         $this->profiler($sql);
 
-        return $this->dbh->query($sql);
+        try {
+            $res = $this->dbh->query($sql);
+        }
+        catch (Exception $e) {
+            $this->is_error  = true;
+            $this->error_msg = $e->getMessage( );
+
+            if ($this->raise_error) {
+                throw new SkinnyException($e->getMessage( ), Skinny::EXECUTE_ERROR);
+            }
+        }
+
+        return $res;
     }
 
 
@@ -729,10 +748,10 @@ BIND    : %s
     {
         if ( array_key_exists($method, $this->mixins) ) {
             $func = $this->mixins[$method];
-            return call_user_func($func, $args);
+            return call_user_func_array($func, $args);
         }
 
-        trigger_error("Call to undefinded function: $method", E_USER_ERROR);
+        trigger_error("Call to undefinded method: $method", E_USER_ERROR);
     }
 
 
@@ -744,7 +763,7 @@ BIND    : %s
 
         foreach ($include as $obj) {
             if ( !is_object($obj) ) {
-                $obj = new $obj;
+                $obj = new $obj($this);
             }
 
             $methods = $obj->register_method( );
