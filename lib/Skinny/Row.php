@@ -32,7 +32,7 @@ class SkinnyRow
     }
 
 
-    function __call ($name, $args)
+    function __call ($name, $null)
     {
         $col = $this->get_column_cached[$name];
 
@@ -41,6 +41,12 @@ class SkinnyRow
         }
 
         return $col;
+    }
+
+
+    function __get ($name)
+    {
+        return $this->$name( );
     }
 
 

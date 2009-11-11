@@ -111,15 +111,7 @@ class SkinnyIterator
         $this->reset( );
 
         while ( $row = $this->next( ) ) {
-            if ( !$columns ) {
-                $columns = $row->select_columns( );
-            }
-
-            foreach ($columns as $col) {
-                $r[$col] = $row->get_column($col);
-            }
-
-            $result[ ] = $r;
+            $result[ ] = $row->get_columns( );
         }
 
         return $result;
