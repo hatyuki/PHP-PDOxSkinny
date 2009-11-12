@@ -165,10 +165,10 @@ class PDOxSkinny
      */
     function connect_info ($connect_info)
     {
-        $this->dsn             = $connect_info['dsn'];
-        $this->username        = $connect_info['username'];
-        $this->password        = $connect_info['password'];
-        $this->connect_options = $connect_info['connect_options'];
+        $this->dsn             = @$connect_info['dsn'];
+        $this->username        = @$connect_info['username'];
+        $this->password        = @$connect_info['password'];
+        $this->connect_options = @$connect_info['connect_options'];
 
         return $this;
     }
@@ -193,7 +193,7 @@ class PDOxSkinny
                 $this->dbh = new PDO($this->dsn, $this->username, $this->password);
                 $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                $auto_commit = $this->connect_options['AutoCommit']
+                $auto_commit = @$this->connect_options['AutoCommit']
                     ? true
                     : false;
 
@@ -310,9 +310,9 @@ class PDOxSkinny
 
     function search ($table=null, $where=array( ), $opt=array( ))
     {
-        $cols = $opt['select']
-              ? $opt['select']
-              : $this->schema->schema_info[$table]['columns'];
+        $cols = @$opt['select']
+              ?  $opt['select']
+              : @$this->schema->schema_info[$table]['columns'];
 
         if ( empty($cols) ) {
             $cols = array('*');
@@ -327,14 +327,14 @@ class PDOxSkinny
             $this->add_where($rs, $where);
         }
 
-        if ( $opt['limit'] ) {
+        if ( @$opt['limit'] ) {
             $rs->limit( $opt['limit'] );
         }
-        if ( $opt['offset'] ) {
+        if ( @$opt['offset'] ) {
             $rs->offset( $opt['offset'] );
         }
 
-        if ( $terms = $opt['order_by'] ) {
+        if ( $terms = @$opt['order_by'] ) {
             if ($this->ref($terms) != 'ARRAY') {
                 $terms = array($terms);
             }
@@ -356,7 +356,7 @@ class PDOxSkinny
             $rs->order($orders);
         }
 
-        if ( $terms = $opt['having'] ) {
+        if ( $terms = @$opt['having'] ) {
             foreach ($terms as $col => $val) {
                 $rs->add_having( array($col => $val) );
             }

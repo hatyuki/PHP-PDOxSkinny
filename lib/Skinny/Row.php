@@ -23,7 +23,7 @@ class SkinnyRow
         foreach ($this->select_columns as $alias) {
             $col = strtolower( preg_replace('/.+\.(.+)/', "$1", $alias) );
 
-            if ( !$this->get_column_cached[$col] ) {
+            if ( !array_key_exists($col, $this->get_column_cached) ) {
                 $data = $this->get_column($col);
                 $this->get_column_cached[$col] =
                     $this->skinny->schema( )->call_inflate($col, $data);

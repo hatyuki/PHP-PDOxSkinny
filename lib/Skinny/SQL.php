@@ -247,13 +247,19 @@ class SkinnySQL
             return $this;
         }
 
-        list($col,  $val) = each($args);
-        list($term, $bind, $tcol) = $this->mk_term($col, $val);
+        if ($this->ref($args) == 'HASH') {
+            $args = array($args);
+        }
 
-        $this->where[ ] = '('.$term.')';
-        $this->bind = array_merge_recursive($this->bind, $bind);
+        foreach ($args as $arg) {
+            list($col,  $val) = each($arg);
+            list($term, $bind, $tcol) = $this->mk_term($col, $val);
 
-        $this->where_values[$tcol] = $val;
+            $this->where[ ] = '('.$term.')';
+            $this->bind = array_merge_recursive($this->bind, $bind);
+
+            $this->where_values[$tcol] = $val;
+        }
 
         return $this;
     }
@@ -297,7 +303,7 @@ class SkinnySQL
 
     private function _add_index_hint ($tbl_name)
     {
-        $hint = $this->index_hint[$tbl_name];
+        $hint = @$this->index_hint[$tbl_name];
 
         if ( !($hint && $this->ref($hint) == 'HASH') ) {
             return $tbl_name;
@@ -331,7 +337,7 @@ class SkinnySQL
 
     private function set_attribute ($args)
     {
-        return $args['column'].($args['desc'] ? (' '.$args['desc']) : '');
+        return $args['column'].(@$args['desc'] ? (' '.$args['desc']) : '');
     }
 
 
@@ -397,8 +403,13 @@ class SkinnySQL
             }
         }
         else {
-            $term = "$col = ?";
-            $bind[ ] = $val;
+            if ( is_null($val) ) {
+                $term = "$col IS NULL";
+            }
+            else {
+                $term = "$col = ?";
+                $bind[ ] = $val;
+            }
         }
 
         return array($term, $bind, $col);
@@ -453,7 +464,7 @@ class SkinnySQL
     function retrieve ( )
     {
         return $this->skinny[0]->search_by_sql(
-            $this->as_sql( ), $this->bind, $this->from[0]
+            $this->as_sql( ), $this->bind, @$this->from[0]
         );
     }
 
