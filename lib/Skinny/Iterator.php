@@ -28,7 +28,8 @@ class SkinnyIterator
     {
         $potision = ++$this->potision;
 
-        if ($row_cache = $this->rows_cache[$potision] ) {
+        if ( array_key_exists($potision, $this->rows_cache) ) {
+            $row_cache = $this->rows_cache[$potision];
             $this->potision = $potision;
             return $row_cache;
         }
@@ -97,6 +98,7 @@ class SkinnyIterator
     function all ( )
     {
         $this->reset( );
+        $result = array( );
 
         while ( $row = $this->next( ) ) {
             $result[ ] = $row;
@@ -109,6 +111,7 @@ class SkinnyIterator
     function all_as_hash ( )
     {
         $this->reset( );
+        $result = array( );
 
         while ( $row = $this->next( ) ) {
             $result[ ] = $row->get_columns( );

@@ -40,7 +40,7 @@ class SkinnyProfiler
         }
         if (Skinny::WRITE_LOG & $this->mode) {
             $date     = date('[Y-m-d H:i:s] ');
-            $log_file = $_SERVER['SKINNY_LOG']
+            $log_file = @$_SERVER['SKINNY_LOG']
                       ? $_SERVER['SKINNY_LOG']
                       : getcwd( ).'/database.log';
 

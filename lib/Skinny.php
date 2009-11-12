@@ -134,7 +134,7 @@ class PDOxSkinny
             return false;
         }
 
-        $this->dbh->rollback( );
+        $this->dbh->rollBack( );
 
         return $this->txn_end( );
     }
@@ -165,10 +165,10 @@ class PDOxSkinny
      */
     function connect_info ($connect_info)
     {
-        $this->dsn             = $connect_info['dsn'];
-        $this->username        = $connect_info['username'];
-        $this->password        = $connect_info['password'];
-        $this->connect_options = $connect_info['connect_options'];
+        $this->dsn             = @$connect_info['dsn'];
+        $this->username        = @$connect_info['username'];
+        $this->password        = @$connect_info['password'];
+        $this->connect_options = @$connect_info['connect_options'];
 
         return $this;
     }
@@ -193,7 +193,7 @@ class PDOxSkinny
                 $this->dbh = new PDO($this->dsn, $this->username, $this->password);
                 $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                $auto_commit = $this->connect_options['AutoCommit']
+                $auto_commit = @$this->connect_options['AutoCommit']
                     ? true
                     : false;
 
@@ -201,7 +201,7 @@ class PDOxSkinny
                     ? $this->connect_options['on_connect_do']
                     : array($this->connect_options['on_connect_do']);
 
-                if ($auto_commit) {
+                if ($this->dbd_type($this->dsn) != 'PostgreSQL') {
                     $this->dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
                 }
 
@@ -215,7 +215,7 @@ class PDOxSkinny
             }
             catch (Exception $e) {
                 $this->is_error  = true;
-                $this->error_msg = $e->toString( );
+                $this->error_msg = $e->getMessage( );
 
                 if ($this->raise_error) {
                     throw new SkinnyException(
@@ -310,9 +310,9 @@ class PDOxSkinny
 
     function search ($table=null, $where=array( ), $opt=array( ))
     {
-        $cols = $opt['select']
-              ? $opt['select']
-              : $this->schema->schema_info[$table]['columns'];
+        $cols = @$opt['select']
+              ?  $opt['select']
+              : @$this->schema->schema_info[$table]['columns'];
 
         if ( empty($cols) ) {
             $cols = array('*');
@@ -327,14 +327,14 @@ class PDOxSkinny
             $this->add_where($rs, $where);
         }
 
-        if ( $opt['limit'] ) {
+        if ( @$opt['limit'] ) {
             $rs->limit( $opt['limit'] );
         }
-        if ( $opt['offset'] ) {
+        if ( @$opt['offset'] ) {
             $rs->offset( $opt['offset'] );
         }
 
-        if ( $terms = $opt['order_by'] ) {
+        if ( $terms = @$opt['order_by'] ) {
             if ($this->ref($terms) != 'ARRAY') {
                 $terms = array($terms);
             }
@@ -356,7 +356,7 @@ class PDOxSkinny
             $rs->order($orders);
         }
 
-        if ( $terms = $opt['having'] ) {
+        if ( $terms = @$opt['having'] ) {
             foreach ($terms as $col => $val) {
                 $rs->add_having( array($col => $val) );
             }
@@ -497,7 +497,7 @@ class PDOxSkinny
             }
             else if ($this->ref($val) == 'SCALAR') {
                 $set[ ]  = "$quoted_col = ?";
-                $bind[ ] = $values;
+                $bind[ ] = $val;
             }
             else {
                 $dump = print_r($val, true);
@@ -568,14 +568,32 @@ class PDOxSkinny
     }
 
 
-    function find_or_insert ($table, $args) { return $thiis->find_or_create($table, $args); }
-    function find_or_create ($table, $args)
+    function find_or_insert ($table, $cond, $args=array( )) { return $thiis->find_or_create($table, $cond, $args); }
+    function find_or_create ($table, $cond, $args=array( ))
     {
-        $row = $this->single($table, $args);
+        $row = $this->single($table, $cond);
 
         if ($row) {
             return $row;
         }
+
+        $args = array_merge_recursive($cond, $args);
+
+        return $this->insert($table, $args);
+    }
+
+
+    function update_or_insert ($table, $cond, $args=array( )) { return $this->update_or_create($table, $cond, $args); }
+    function update_or_create ($table, $cond, $args=array( ))
+    {
+        $row = $this->single($table, $cond);
+
+        if ($row) {
+            $this->update($table, $args, $cond);
+            return $this->single($table, $cond);
+        }
+
+        $args = array_merge_recursive($cond, $args);
 
         return $this->insert($table, $args);
     }
@@ -769,7 +787,16 @@ BIND    : %s
             $methods = $obj->register_method( );
 
             foreach ($methods as $method => $callback) {
-                $this->mixins[$method] = $callback;
+                if ( is_callable($callback) ) {
+                    $this->mixins[$method] = $callback;
+                }
+                else {
+                    trigger_error(
+                        "could not register '$method'. ".
+                        'must be a valid callback.',
+                        E_USER_WARNING
+                    );
+                }
             }
         }
     }
