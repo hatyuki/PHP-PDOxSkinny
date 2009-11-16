@@ -41,6 +41,7 @@ class PDOxSkinny
     private $is_error           = false;     // -- Bool
     private $error_msg          = null;      // -- Str
     private $raise_error        = false;     // -- Bool
+    private $in_storage         = false;
 
 
     function __construct ($args=array( ))
@@ -89,6 +90,7 @@ class PDOxSkinny
     function is_error    ( ) { return $this->is_error; }
     function raise_error ( ) { return $this->raise_error; }
     function get_err_msg ( ) { return $this->error_msg; }
+    function in_storage  ( ) { return $this->in_storage; }
 
 
     /* ---------------------------------------------------------------
@@ -384,15 +386,22 @@ class PDOxSkinny
     }
 
 
-    function find_or_new ($table, $args)
+    function find_or_new    ($table, $args)
     {
         $row = $this->single($table, $args);
 
         if ( !$row ) {
+            $this->in_storage = false;
             $row = $this->data2itr($table, array($args))->first( );
         }
 
+        $this->in_storage = true;
         return $row;
+    }
+
+    function find_or_create ($table, $args)
+    {
+        return $this->find_or_create($table, $args);
     }
 
 
@@ -568,34 +577,46 @@ class PDOxSkinny
     }
 
 
-    function find_or_insert ($table, $cond, $args=array( )) { return $thiis->find_or_create($table, $cond, $args); }
     function find_or_create ($table, $cond, $args=array( ))
     {
         $row = $this->single($table, $cond);
 
         if ($row) {
+            $this->in_storage = true;
             return $row;
         }
 
+        $this->in_storage = false;
         $args = array_merge_recursive($cond, $args);
 
         return $this->insert($table, $args);
     }
 
+    function find_or_insert ($table, $cond, $args=array( ))
+    {
+        return $thiis->find_or_create($table, $cond, $args);
+    }
 
-    function update_or_insert ($table, $cond, $args=array( )) { return $this->update_or_create($table, $cond, $args); }
+
     function update_or_create ($table, $cond, $args=array( ))
     {
         $row = $this->single($table, $cond);
 
         if ($row) {
+            $this->in_storage = true;
             $this->update($table, $args, $cond);
             return $this->single($table, $cond);
         }
 
+        $this->in_storage = false;
         $args = array_merge_recursive($cond, $args);
 
         return $this->insert($table, $args);
+    }
+
+    function update_or_insert ($table, $cond, $args=array( ))
+    {
+        return $this->update_or_create($table, $cond, $args);
     }
 
 
