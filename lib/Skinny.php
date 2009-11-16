@@ -386,12 +386,14 @@ class PDOxSkinny
     }
 
 
-    function find_or_new    ($table, $args)
+    function find_or_new ($table, $cond, $args=array( ))
     {
-        $row = $this->single($table, $args);
+        $row = $this->single($table, $cond);
 
         if ( !$row ) {
             $this->in_storage = false;
+
+            $args = array_merge_recursive($cond, $args);
             $row = $this->data2itr($table, array($args))->first( );
         }
 
@@ -399,9 +401,9 @@ class PDOxSkinny
         return $row;
     }
 
-    function find_or_create ($table, $args)
+    function find_or_create ($table, $cond, $args=array( ))
     {
-        return $this->find_or_create($table, $args);
+        return $this->find_or_create($table, $cond, $args);
     }
 
 
@@ -577,34 +579,13 @@ class PDOxSkinny
     }
 
 
-    function find_or_create ($table, $cond, $args=array( ))
-    {
-        $row = $this->single($table, $cond);
-
-        if ($row) {
-            $this->in_storage = true;
-            return $row;
-        }
-
-        $this->in_storage = false;
-        $args = array_merge_recursive($cond, $args);
-
-        return $this->insert($table, $args);
-    }
-
-    function find_or_insert ($table, $cond, $args=array( ))
-    {
-        return $thiis->find_or_create($table, $cond, $args);
-    }
-
-
     function update_or_create ($table, $cond, $args=array( ))
     {
         $row = $this->single($table, $cond);
 
         if ($row) {
             $this->in_storage = true;
-            $this->update($table, $args, $cond);
+            $row->update($args);
             return $this->single($table, $cond);
         }
 

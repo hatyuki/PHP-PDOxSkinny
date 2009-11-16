@@ -93,7 +93,7 @@ class SkinnyRow
     }
 
 
-    function insert ($args, $table)
+    function insert ($args)
     {
         return $this->skinny->find_or_create(
             $this->opt_table_info, $this->get_column( )
@@ -101,7 +101,7 @@ class SkinnyRow
     }
 
 
-    function update ($args, $table)
+    function update ($args=array( ), $table=null)
     {
         $table = $table ? $table : $this->opt_table_info;
         $args  = $args  ? $args  : $this->get_dirty_columns( );
