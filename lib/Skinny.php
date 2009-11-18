@@ -46,9 +46,13 @@ class PDOxSkinny
 
     function __construct ($args=array( ))
     {
-        $schema  = get_class($this).'Schema';
-        $this->active_transaction = false;
-        $this->schema             = new $schema;
+        $schema = array_key_exists('schema', $args)
+                ? $args['schema']
+                : get_class($this).'Schema';
+
+        $this->schema = is_object($schema)
+                      ? $schema
+                      : new $schema;
 
         if ( method_exists($this->schema, 'register_schema') ) {
             $this->schema->register_schema( );
@@ -62,14 +66,14 @@ class PDOxSkinny
             $this->profiler    = new SkinnyProfiler($this->profile);
         }
         else if ( !empty($args) ) {
-            $this->raise_error = $args['raise_error']
-                               ? true
+            $this->raise_error = array_key_exists('raise_error', $args)
+                               ? $args['raise_error']
                                : false;
 
-            $profile = $args['profile']
-                     ? $args['profile']
-                     : $_SERVER['SKINNY_PROFILE'];
-            $this->profile  = $profile;
+            $this->profile = array_key_exists('profile', $args)
+                           ?   $args['profile']
+                           :  @$_SERVER['SKINNY_PROFILE'];
+
             $this->profiler = new SkinnyProfiler($this->profile);
 
             $this->connect_info($args);
@@ -524,10 +528,11 @@ class PDOxSkinny
 
         $this->profiler($sql, $bind);
 
-        $sth  = $this->dbh->prepare($sql);
-        $rows = $sth->execute($bind);
-
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute($bind);
         $this->close_sth($sth);
+
+        $rows = $this->search($table, $where);
         $this->call_schema_trigger('post_update', $schema, $table, $rows);
 
         return $rows;
