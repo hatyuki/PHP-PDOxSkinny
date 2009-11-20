@@ -532,10 +532,12 @@ class PDOxSkinny
         $sth->execute($bind);
         $this->close_sth($sth);
 
-        $rows = $this->search($table, $where);
-        $this->call_schema_trigger('post_update', $schema, $table, $rows);
+        $itr = $this->search($table, $where);
+        while ( $row = $itr->next( ) ) {
+            $this->call_schema_trigger('post_update', $schema, $table, $row);
+        }
 
-        return $rows;
+        return $itr;
     }
 
 
