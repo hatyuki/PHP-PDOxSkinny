@@ -537,7 +537,7 @@ class PDOxSkinny
             $this->call_schema_trigger('post_update', $schema, $table, $row);
         }
 
-        return $itr;
+        return $itr->reset( );
     }
 
 

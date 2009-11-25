@@ -248,18 +248,18 @@ class SkinnySQL
         }
 
         if ($this->ref($args) == 'HASH') {
-            $args = array($args);
-        }
+			foreach ($args as $col => $val) {
+				list($term, $bind, $tcol) = $this->mk_term($col, $val);
 
-        foreach ($args as $arg) {
-            list($col,  $val) = each($arg);
-            list($term, $bind, $tcol) = $this->mk_term($col, $val);
+				$this->where[ ] = '('.$term.')';
+				$this->bind = array_merge_recursive($this->bind, $bind);
 
-            $this->where[ ] = '('.$term.')';
-            $this->bind = array_merge_recursive($this->bind, $bind);
-
-            $this->where_values[$tcol] = $val;
-        }
+				$this->where_values[$tcol] = $val;
+			}
+		}
+		else {
+            trigger_error('argument must be hash', E_USER_ERROR);
+		}
 
         return $this;
     }

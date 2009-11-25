@@ -50,6 +50,12 @@ class SkinnyRow
     }
 
 
+    function __set ($name, $val)
+    {
+        return $this->set( array($name => $val) );
+    }
+
+
     function get_column ($col)
     {
         return $this->row_data[$col];
