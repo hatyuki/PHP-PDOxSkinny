@@ -406,6 +406,10 @@ class SkinnySQL
             if ( is_null($val) ) {
                 $term = "$col IS NULL";
             }
+            else if ( is_bool($val) ) {
+                $term  = "$col IS ";
+                $term .= $val ? 'TRUE' : 'FALSE';
+            }
             else {
                 $term = "$col = ?";
                 $bind[ ] = $val;

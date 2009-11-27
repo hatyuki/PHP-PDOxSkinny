@@ -438,7 +438,13 @@ class PDOxSkinny
 
         foreach ($args as $col => $val) {
             $cols[ ] = $col;
-            $bind[ ] = $val;
+
+            if ( is_bool($val) ) {
+                $bind[ ] = $val ? 'TRUE' : 'FALSE';
+            }
+            else {
+                $bind[ ] = $val;
+            }
         }
 
         $sql  = "INSERT INTO $table\n";
@@ -508,11 +514,17 @@ class PDOxSkinny
             $quoted_col = $this->quote($col, $quote, $name_sep);
 
             if ( $this->ref($val) == 'ARRAY' && array_key_exists('inject', $val) ) {
-                $set[ ] = "$quoted_col = $val";
+                $set[ ] = "$quoted_col $val";
             }
             else if ($this->ref($val) == 'SCALAR') {
                 $set[ ]  = "$quoted_col = ?";
-                $bind[ ] = $val;
+
+                if ( is_bool($val) ) {
+                    $bind[ ] = $val ? 'TRUE' : 'FALSE';
+                }
+                else {
+                    $bind[ ] = $val;
+                }
             }
             else {
                 $dump = print_r($val, true);
