@@ -200,12 +200,12 @@ class PDOxSkinny
                 $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
                 $auto_commit = @$this->connect_options['AutoCommit']
-                    ? true
-                    : false;
+                             ? true
+                             : false;
 
                 $on_connect_do = is_array($this->connect_options['on_connect_do'])
-                    ? $this->connect_options['on_connect_do']
-                    : array($this->connect_options['on_connect_do']);
+                               ? $this->connect_options['on_connect_do']
+                               : array($this->connect_options['on_connect_do']);
 
                 if ($this->dbd_type($this->dsn) != 'PostgreSQL') {
                     $this->dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
@@ -398,16 +398,18 @@ class PDOxSkinny
             $this->in_storage = false;
 
             $args = array_merge_recursive($cond, $args);
-            $row = $this->data2itr($table, array($args))->first( );
+            $row  = $this->data2itr($table, array($args))->first( );
+        }
+        else {
+            $this->in_storage = true;
         }
 
-        $this->in_storage = true;
         return $row;
     }
 
     function find_or_create ($table, $cond, $args=array( ))
     {
-        return $this->find_or_create($table, $cond, $args);
+        return $this->find_or_new($table, $cond, $args);
     }
 
 

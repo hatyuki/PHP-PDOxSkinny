@@ -181,6 +181,20 @@ class SkinnySQL
     }
 
 
+    function limit ($limit)
+    {
+        $this->limit = $limit;
+        return $this;
+    }
+
+
+    function offset ($offset)
+    {
+        $this->offset = $offset;
+        return $this;
+    }
+
+
     function as_limit ( )
     {
         $limit  = is_array($this->limit)  ? $this->limit[0]  : $this->limit;
