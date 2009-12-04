@@ -48,20 +48,69 @@ class SkinnySQL
     function bind ( ) { return $this->bind; }
 
 
-    function add_select ($term, $col=null)
+    function add_select ($terms, $col=null)
     {
-        if ( is_array($term) ) {
-            list($term, $col) = each($term);
+        switch ( $this->ref($terms) ) {
+        case 'HASH':
+            foreach ($terms as $term => $col) {
+                $this->select[ ] = $term;
+                $this->select_map[$term] = $col;
+                $this->select_map_reverse[$col] = $term;
+            }
+            break;
+
+        case 'ARRAY':
+            foreach ($terms as $term) {
+                $col = $term;
+
+                $this->select[ ] = $term;
+                $this->select_map[$term] = $col;
+                $this->select_map_reverse[$col] = $term;
+            }
+            break;
+
+        case 'SCALAR':
+            if ( !$col ) {
+                $col = $terms;
+            }
+
+            $this->select[ ] = $terms;
+            $this->select_map[$terms] = $col;
+            $this->select_map_reverse[$col] = $terms;
+
+            break;
+
+        default:
+            trigger_error('Parse Error: add_select', E_USER_ERROR);
+            return;
         }
 
-        if ( empty($col) && $col != 0 ) {
-            $col = $term;
+        return $this;
+    }
+
+
+    function from ($args)
+    {
+        switch ( $this->ref($args) ) {
+        case 'ARRAY':
+            $this->from = $args;
+            break;
+
+        case 'HASH':
+            foreach ($args as $term => $name) {
+                $terms[ ] = $term.' '.$name;
+            }
+
+            $this->from = $terms;
+            break;
+
+        case 'SCALAR':
+            $this->from = array($args);
+            break;
+
+        default:
+            trigger_error('Parse Error: from', E_USER_ERROR);
         }
-
-        $this->select[ ] = $term;
-
-        $this->select_map[$term] = $col;
-        $this->select_map_reverse[$col] = $term;
 
         return $this;
     }

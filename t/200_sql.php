@@ -25,6 +25,9 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
         $obj->from( array('foo', 'bar') );
         $this->assertEquals("FROM foo, bar\n", $obj->as_sql( ));
+
+        $obj->from( array('foo_bar_quu' => 'fbq') );
+        $this->assertEquals("FROM foo_bar_quu fbq\n", $obj->as_sql( ));
     }
 
     function testJoin ( )
