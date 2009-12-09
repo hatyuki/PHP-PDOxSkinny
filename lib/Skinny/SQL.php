@@ -48,6 +48,23 @@ class SkinnySQL
     function bind ( ) { return $this->bind; }
 
 
+    private function skinny ($skinny=null)
+    {
+        $this->skinny = $skinny;
+    }
+
+
+    function select ($select=null)
+    {
+        if ( is_null($select) ) {
+            return $this->select;
+        }
+
+        $this->select = $select;
+        return $this;
+    }
+
+
     function add_select ($terms, $col=null)
     {
         switch ( $this->ref($terms) ) {
@@ -85,6 +102,28 @@ class SkinnySQL
             return;
         }
 
+        return $this;
+    }
+
+
+    function select_map ($map=null)
+    {
+        if ( is_null($map) ) {
+            return $this->select_map;
+        }
+
+        $this->select_map = $map;
+        return $this;
+    }
+
+
+    function distinct ($distinct=null)
+    {
+        if ( is_null($distinct) ) {
+            return $this->distinct;
+        }
+
+        $this->distinct = $distinct;
         return $this;
     }
 
@@ -142,6 +181,20 @@ class SkinnySQL
                     : array($hint['list']),
         );
 
+        return $this;
+    }
+
+
+    function comment ($comment)
+    {
+        $this->comment = $comment;
+        return $this;
+    }
+
+
+    function joins ($joins)
+    {
+        $this->joins = $joins;
         return $this;
     }
 
@@ -263,6 +316,20 @@ class SkinnySQL
             $limit,
             is_integer($offset) ? ' OFFSET '.intval($offset) : ''
         );
+    }
+
+
+    function group ($group)
+    {
+        $this->group = $group;
+        return $this;
+    }
+
+
+    function order ($order)
+    {
+        $this->order = $order;
+        return $this;
     }
 
 
@@ -530,7 +597,7 @@ class SkinnySQL
 
     function retrieve ( )
     {
-        return $this->skinny[0]->search_by_sql(
+        return $this->skinny->search_by_sql(
             $this->as_sql( ), $this->bind, @$this->from[0]
         );
     }

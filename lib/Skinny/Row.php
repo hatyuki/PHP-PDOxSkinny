@@ -46,7 +46,13 @@ class SkinnyRow
 
     function __get ($name)
     {
-        return $this->$name( );
+        $col = $this->get_column_cached[$name];
+
+        if ( !in_array($name, $this->select_columns) ) {
+            trigger_error("unknown column: $name", E_USER_ERROR);
+        }
+
+        return $col;
     }
 
 
