@@ -390,6 +390,7 @@ class PDOxSkinny
     }
 
 
+    // row クラスを作るだけで DB に対しては何もしない
     function find_or_new ($table, $cond, $args=array( ))
     {
         $row = $this->single($table, $cond);
@@ -407,9 +408,26 @@ class PDOxSkinny
         return $row;
     }
 
+    function find_or_insert ($table, $cond, $args=array( ))
+    {
+        $row = $this->single($table, $cond);
+
+        if ( !$row ) {
+            $this->in_storage = false;
+
+            $args = array_merge_recursive($cond, $args);
+            $row  = $this->insert($table, $args);
+        }
+        else {
+            $this->in_storage = true;
+        }
+
+        return $row;
+    }
+
     function find_or_create ($table, $cond, $args=array( ))
     {
-        return $this->find_or_new($table, $cond, $args);
+        return $this->find_or_insert($table, $cond, $args);
     }
 
 
@@ -546,7 +564,7 @@ class PDOxSkinny
         $sth->execute($bind);
         $this->close_sth($sth);
 
-        $itr = $this->search($table, $where);
+        $itr = $this->search($table, $where)->with_cache( );
         while ( $row = $itr->next( ) ) {
             $this->call_schema_trigger('post_update', $schema, $table, $row);
         }
@@ -717,8 +735,9 @@ class PDOxSkinny
         $this->error_msg = null;
 
         try {
-
-            $sth = $this->dbh->prepare($stmt);
+            $sth = $this->dbh->prepare(
+                $stmt, array(PDO::CURSOR_SCROLL => PDO::ATTR_CURSOR)
+            );
             $sth->execute($bind);
         }
         catch (Exception $e) {
