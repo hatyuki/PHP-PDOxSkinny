@@ -10,8 +10,9 @@ class SkinnyIterator
     private $data           = null;      // -- Array
     private $opt_table_info = null;      // -- Str
     private $row_class      = null;      // -- Str
-    private $potision       = 0;         // -- Int
+    private $position       = 0;         // -- Int
     private $rows_cache     = array( );  // -- Array
+    private $cache          = false;      // -- Bool
 
 
     function __construct ($args)
@@ -26,16 +27,16 @@ class SkinnyIterator
 
     function iterator ( )
     {
-        $potision = ++$this->potision;
+        $position = $this->position + 1;
 
-        if ( array_key_exists($potision, $this->rows_cache) ) {
-            $row_cache = $this->rows_cache[$potision];
-            $this->potision = $potision;
-            return $row_cache;
+        if ( $this->cache && array_key_exists($position, $this->rows_cache) ) {
+        //if ( array_key_exists($position, $this->rows_cache) ) {
+            $this->position = $position;
+            return $this->rows_cache[$position];
         }
 
         if ($this->sth) {
-            $row = $this->sth->fetch(PDO::FETCH_ASSOC);
+            $row =& $this->sth->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, $position);
 
             if ( !$row ) {
                 $this->skinny->close_sth($this->sth);
@@ -58,7 +59,6 @@ class SkinnyIterator
             return $row;
         }
 
-
         $args = array(
             'row_data'       => $row,
             'skinny'         => $this->skinny,
@@ -74,8 +74,10 @@ class SkinnyIterator
             $obj = new SkinnyRow($args);
         }
 
-        $this->rows_cache[$potision] = $obj;
-        $this->potision = $potision;
+        //if ($this->cache) {
+            $this->rows_cache[$position] = $obj;
+        //}
+        $this->position = $position;
 
         return $obj;
     }
@@ -123,7 +125,7 @@ class SkinnyIterator
 
     function reset ( )
     {
-        $this->potision = 0;
+        $this->position = 0;
 
         return $this;
     }
@@ -136,5 +138,19 @@ class SkinnyIterator
         $this->reset( );
 
         return sizeof($rows);
+    }
+
+
+    function no_cache ( )
+    {
+        $this->cache = false;
+        return $this;
+    }
+
+
+    function with_cache ( )
+    {
+        $this->cache = true;
+        return $this;
     }
 }
