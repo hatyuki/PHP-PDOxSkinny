@@ -70,7 +70,12 @@ class SkinnySQL
         switch ( $this->ref($terms) ) {
         case 'HASH':
             foreach ($terms as $term => $col) {
-                $this->select[ ] = $term;
+                if ( is_array($this->select) ) {
+                    $this->select[ ] = $term;
+                }
+                else {
+                    $this->select = array($this->select, $term);
+                }
                 $this->select_map[$term] = $col;
                 $this->select_map_reverse[$col] = $term;
             }
@@ -80,7 +85,12 @@ class SkinnySQL
             foreach ($terms as $term) {
                 $col = $term;
 
-                $this->select[ ] = $term;
+                if ( is_array($this->select) ) {
+                    $this->select[ ] = $term;
+                }
+                else {
+                    $this->select = array($this->select, $term);
+                }
                 $this->select_map[$term] = $col;
                 $this->select_map_reverse[$col] = $term;
             }
@@ -91,7 +101,12 @@ class SkinnySQL
                 $col = $terms;
             }
 
-            $this->select[ ] = $terms;
+            if ( is_array($this->select) ) {
+                $this->select[ ] = $term;
+            }
+            else {
+                $this->select = array($this->select, $term);
+            }
             $this->select_map[$terms] = $col;
             $this->select_map_reverse[$col] = $terms;
 
@@ -211,7 +226,13 @@ class SkinnySQL
             }
 
             $func = array($this, 'set_alias');
-            $sql .= join( ', ', array_map($func, $this->select) );
+
+            if ( is_array($this->select) ) {
+                $sql .= join( ', ', array_map($func, $this->select) );
+            }
+            else {
+                $sql .= $this->select;
+            }
             $sql .= "\n";
         }
 
@@ -595,10 +616,14 @@ class SkinnySQL
     }
 
 
-    function retrieve ( )
+    function retrieve ($table=null)
     {
+        if ( !$table ) {
+            $table = @$this->from[0];
+        }
+
         return $this->skinny->search_by_sql(
-            $this->as_sql( ), $this->bind, @$this->from[0]
+            $this->as_sql( ), $this->bind, $table
         );
     }
 

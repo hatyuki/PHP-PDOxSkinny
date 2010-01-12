@@ -7,11 +7,13 @@ class SkinnyProfiler
 {
     public  $query_log = array( );  // -- Array
     private $mode      = 0;         // -- Int
+    private $logfile   = null;
 
 
-    function __construct ($mode=0)
+    function __construct ($mode=0, $logfile=null)
     {
-        $this->mode = intval($mode);
+        $this->mode    = intval($mode);
+        $this->logfile = $logfile;
         $this->reset( );
     }
 
@@ -39,12 +41,9 @@ class SkinnyProfiler
             print '[DEBUG] '.$log."\n";
         }
         if (Skinny::WRITE_LOG & $this->mode) {
-            $date     = date('[Y-m-d H:i:s] ');
-            $log_file = @$_SERVER['SKINNY_LOG']
-                      ? $_SERVER['SKINNY_LOG']
-                      : getcwd( ).'/database.log';
+            $date = date('[Y-m-d H:i:s] ');
 
-            error_log($date.$log."\n", 3, $log_file);
+            error_log($date.$log."\n", 3, $this->logfile);
         }
     }
 

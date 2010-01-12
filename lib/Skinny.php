@@ -36,45 +36,59 @@ class PDOxSkinny
     private $schema             = null;      // -- Object[SkinnySchema]
     private $profiler           = null;      // -- Object[SkinnyProfiler]
     private $profile            = false;     // -- Bool
+    private $logfile            = null;      // -- Str
     private $active_transaction = false;     // -- Bool
     private $mixins             = array( );  // -- Hash
     private $is_error           = false;     // -- Bool
     private $error_msg          = null;      // -- Str
     private $raise_error        = false;     // -- Bool
-    private $in_storage         = false;
+    private $in_storage         = false;     // -- Bool
 
 
     function __construct ($args=array( ))
     {
-        $schema = array_key_exists('schema', $args)
-                ? $args['schema']
-                : get_class($this).'Schema';
-
-        $this->schema = is_object($schema)
-                      ? $schema
-                      : new $schema;
-
-        if ( method_exists($this->schema, 'register_schema') ) {
-            $this->schema->register_schema( );
-        }
-
         if ( is_a($args, 'PDOxSkinny') ) {
             $this->dbh         = $args->dbh( );
             $this->dbd         = $args->dbd( );
+            $this->schema      = $args->schema( );
             $this->raise_error = $args->raise_error( );
             $this->profile     = $args->profile( );
-            $this->profiler    = new SkinnyProfiler($this->profile);
+            $this->logfile     = $args->logfile( );
+            $this->profiler    = new SkinnyProfiler(
+                $this->profile, $this->logfile
+            );
         }
         else if ( !empty($args) ) {
+            $schema = array_key_exists('schema', $args)
+                    ? $args['schema']
+                    : get_class($this).'Schema';
+
+            $this->schema = is_object($schema)
+                          ? $schema
+                          : new $schema;
+
+            if ( method_exists($this->schema, 'register_schema') ) {
+                $this->schema->register_schema( );
+            }
+
             $this->raise_error = array_key_exists('raise_error', $args)
                                ? $args['raise_error']
                                : false;
 
             $this->profile = array_key_exists('profile', $args)
-                           ?   $args['profile']
-                           :  @$_SERVER['SKINNY_PROFILE'];
+                           ?  $args['profile']
+                           : @$_SERVER['SKINNY_PROFILE'];
 
-            $this->profiler = new SkinnyProfiler($this->profile);
+            if ( array_key_exists('query_log', $args) ) {
+                $this->logfile = $args['query_log'];
+            }
+            else {
+                $this->logfile = array_key_exists('SKINNY_LOG', $_SERVER)
+                               ? $_SERVER['SKINNY_LOG']
+                               : getcwd( ).'/database.log';
+            }
+
+            $this->profiler = new SkinnyProfiler($this->profile, $this->logfile);
 
             $this->connect_info($args);
             $this->reconnect( );
@@ -91,6 +105,7 @@ class PDOxSkinny
     function query_log   ( ) { return $this->profiler->query_log; }
     function txn_status  ( ) { return $this->active_transaction; }
     function profile     ( ) { return $this->profile; }
+    function logfile     ( ) { return $this->logfile; }
     function is_error    ( ) { return $this->is_error; }
     function raise_error ( ) { return $this->raise_error; }
     function get_err_msg ( ) { return $this->error_msg; }
@@ -175,6 +190,12 @@ class PDOxSkinny
         $this->username        = @$connect_info['username'];
         $this->password        = @$connect_info['password'];
         $this->connect_options = @$connect_info['connect_options'];
+
+        $this->connect_options['on_connect_do'] = @$connect_info['on_connect_do'];
+
+        if ( !$this->dsn ) {
+            trigger_error('require dsn', E_USER_ERROR);
+        }
 
         return $this;
     }
@@ -398,7 +419,7 @@ class PDOxSkinny
         if ( !$row ) {
             $this->in_storage = false;
 
-            $args = array_merge_recursive($cond, $args);
+            $args = array_merge($cond, $args);
             $row  = $this->data2itr($table, array($args))->first( );
         }
         else {
@@ -415,7 +436,7 @@ class PDOxSkinny
         if ( !$row ) {
             $this->in_storage = false;
 
-            $args = array_merge_recursive($cond, $args);
+            $args = array_merge($cond, $args);
             $row  = $this->insert($table, $args);
         }
         else {
@@ -629,7 +650,7 @@ class PDOxSkinny
         }
 
         $this->in_storage = false;
-        $args = array_merge_recursive($cond, $args);
+        $args = array_merge($cond, $args);
 
         return $this->insert($table, $args);
     }
@@ -643,7 +664,7 @@ class PDOxSkinny
     private function dbd_type ($dsn)
     {
         if ( !preg_match('/^(.+):/', $dsn, $m) ) {
-            trigger_error('unknown db type', E_USER_ERROR);
+            trigger_error("unknown db type: $dsn", E_USER_ERROR);
         }
 
         switch ($m[1]) {
