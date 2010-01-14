@@ -1,4 +1,4 @@
-<?php  // vim: ts=4 sts=4 sw=4
+<?php
 
 
 // SkinnySQL based on DBIx::Skinny 0.04
@@ -498,7 +498,7 @@ class SkinnySQL
         $bind = array( );
 
         if ($this->ref($val) == 'ARRAY') {
-            if ($this->ref($val[0]) != 'SCALAR' || $val[0] == '-and') {
+            if ($this->ref($val[0]) !== 'SCALAR' || $val[0] === '-and') {
                 $logic  = 'OR';
                 $values = $val;
 
@@ -558,8 +558,7 @@ class SkinnySQL
                 $term = "$col IS NULL";
             }
             else if ( is_bool($val) ) {
-                $term  = "$col IS ";
-                $term .= $val ? 'TRUE' : 'FALSE';
+                $term  = "$col IS ".($val ? 'TRUE' : 'FALSE');
             }
             else {
                 $term = "$col = ?";
