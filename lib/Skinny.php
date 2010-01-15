@@ -276,7 +276,7 @@ class PDOxSkinny
      */
     function call_schema_trigger ($trigger, $schema, &$table, &$args=array( ))
     {
-        $schema->call_trigger($this, &$table, $trigger, &$args);
+        $schema->call_trigger($this, $table, $trigger, $args);
     }
 
 
@@ -646,7 +646,8 @@ class PDOxSkinny
         if ($row) {
             $this->in_storage = true;
             $row->update($args);
-            return $this->single($table, $cond);
+
+            return $row;
         }
 
         $this->in_storage = false;
