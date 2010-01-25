@@ -10,9 +10,10 @@ class SkinnyIterator
     private $data           = null;      // -- Array
     private $opt_table_info = null;      // -- Str
     private $row_class      = null;      // -- Str
+    private $base_row_class = null;
     private $position       = 0;         // -- Int
     private $rows_cache     = array( );  // -- Array
-    private $cache          = false;      // -- Bool
+    private $cache          = true;      // -- Bool
 
 
     function __construct ($args)
@@ -30,7 +31,6 @@ class SkinnyIterator
         $position = $this->position + 1;
 
         if ( $this->cache && array_key_exists($position, $this->rows_cache) ) {
-        //if ( array_key_exists($position, $this->rows_cache) ) {
             $this->position = $position;
             return $this->rows_cache[$position];
         }
@@ -68,15 +68,15 @@ class SkinnyIterator
 
         if ( class_exists($this->row_class) ) {
             $class = $this->row_class;
-            $obj = new $class($args);
-        } 
+            $obj   = new $class($args);
+        }
         else {
             $obj = new SkinnyRow($args);
         }
 
-        //if ($this->cache) {
+        if ($this->cache) {
             $this->rows_cache[$position] = $obj;
-        //}
+        }
         $this->position = $position;
 
         return $obj;

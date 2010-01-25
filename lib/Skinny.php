@@ -1,4 +1,4 @@
-<?php  // vim: ts=4 sts=4 sw=4
+<?php
 require_once 'Skinny/Profiler.php';
 require_once 'Skinny/Iterator.php';
 require_once 'Skinny/Transaction.php';
@@ -585,7 +585,7 @@ class PDOxSkinny
         $sth->execute($bind);
         $this->close_sth($sth);
 
-        $itr = $this->search($table, $where)->with_cache( );
+        $itr = $this->search($table, $where);
         while ( $row = $itr->next( ) ) {
             $this->call_schema_trigger('post_update', $schema, $table, $row);
         }
@@ -641,20 +641,27 @@ class PDOxSkinny
 
     function update_or_create ($table, $cond, $args=array( ))
     {
-        $row = $this->single($table, $cond);
+        $itr = $this->search($table, $cond);
+        $row;
 
-        if ($row) {
+        if ($itr->count( ) == 0) {
+            $this->in_storage = false;
+            $args = array_merge($cond, $args);
+            $row  = $this->insert($table, $args);
+        }
+        else if ($itr->count( ) == 1) {
             $this->in_storage = true;
+            $args = array_merge($cond, $args);
+            $row  = $itr->first( );
             $row->update($args);
-
-            return $row;
+        }
+        else {
+            trigger_error('Could not update; Query returned more than one row');
         }
 
-        $this->in_storage = false;
-        $args = array_merge($cond, $args);
-
-        return $this->insert($table, $args);
+        return $row;
     }
+
 
     function update_or_insert ($table, $cond, $args=array( ))
     {
@@ -708,9 +715,17 @@ class PDOxSkinny
 
     private function mk_row_class ($table)
     {
-        return empty($table)
-             ? 'SkinnyRow'
-             : get_class($this).'Row'.$this->camelize($table);
+        $row_class = get_class($this).'Row';
+
+        if ( class_exists($row_class.$this->camelize($table)) ) {
+            return $row_class.$this->camelize($table);
+        }
+        else if ( class_exists($row_class) ) {
+            return $row_class;
+        }
+        else {
+            return 'SkinnyRow';
+        }
     }
 
 
