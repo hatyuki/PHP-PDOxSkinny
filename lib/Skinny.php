@@ -91,7 +91,11 @@ class PDOxSkinny
             $this->profiler = new SkinnyProfiler($this->profile, $this->logfile);
 
             $this->connect_info($args);
+
+            $raise_error = $this->raise_error;
+            $this->raise_error = true;
             $this->reconnect( );
+            $this->raise_error = $raise_error;
         }
     }
 
