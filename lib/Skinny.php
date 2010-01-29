@@ -91,7 +91,11 @@ class PDOxSkinny
             $this->profiler = new SkinnyProfiler($this->profile, $this->logfile);
 
             $this->connect_info($args);
+
+            $raise_error = $this->raise_error;
+            $this->raise_error = true;
             $this->reconnect( );
+            $this->raise_error = $raise_error;
         }
     }
 
@@ -641,18 +645,18 @@ class PDOxSkinny
 
     function update_or_create ($table, $cond, $args=array( ))
     {
-        $itr = $self->search($table, $cond);
+        $itr = $this->search($table, $cond);
         $row;
 
-        if ($itr->count == 0) {
+        if ($itr->count( ) == 0) {
             $this->in_storage = false;
             $args = array_merge($cond, $args);
-            $row  = $self->insert($table, $args);
+            $row  = $this->insert($table, $args);
         }
-        else if ($itr->count == 1) {
+        else if ($itr->count( ) == 1) {
             $this->in_storage = true;
             $args = array_merge($cond, $args);
-            $row  = $itr->first;
+            $row  = $itr->first( );
             $row->update($args);
         }
         else {
