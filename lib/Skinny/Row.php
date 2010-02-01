@@ -1,14 +1,14 @@
-<?php  // vim: ts=4 sts=4 sw=4
+<?php
 
 
 // SkinnyRow based on DBIx::Skinny 0.04
 class SkinnyRow
 {
-    private   $select_columns    = null;      // -- Array
-    private   $row_data          = array( );  // -- Hash
-    private   $get_column_cached = array( );  // -- Hash
-    private   $dirty_columns     = false;     // -- Bool
-    private   $opt_table_info    = null;      // -- Str
+    protected $select_columns    = null;      // -- Array
+    protected $row_data          = array( );  // -- Hash
+    protected $get_column_cached = array( );  // -- Hash
+    protected $dirty_columns     = false;     // -- Bool
+    protected $opt_table_info    = null;      // -- Str
     protected $skinny            = null;      // -- Object
 
 
@@ -34,11 +34,11 @@ class SkinnyRow
 
     function __call ($name, $null)
     {
-        $col = $this->get_column_cached[$name];
-
         if ( !in_array($name, $this->select_columns) ) {
             trigger_error("unknown column: $name", E_USER_ERROR);
         }
+
+        $col = $this->get_column_cached[$name];
 
         return $col;
     }
@@ -46,11 +46,11 @@ class SkinnyRow
 
     function __get ($name)
     {
-        $col = $this->get_column_cached[$name];
-
         if ( !in_array($name, $this->select_columns) ) {
             trigger_error("unknown column: $name", E_USER_ERROR);
         }
+
+        $col = $this->get_column_cached[$name];
 
         return $col;
     }
@@ -140,7 +140,7 @@ class SkinnyRow
     function select_columns ( ) { return $this->select_columns; }
 
 
-    private function update_or_delete_cond ($table)
+    protected function update_or_delete_cond ($table)
     {
         if ( !$table ) {
             trigger_error('no table info', E_USER_ERROR);

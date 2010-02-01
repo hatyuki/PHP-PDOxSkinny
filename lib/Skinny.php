@@ -27,22 +27,22 @@ class SkinnyException extends Exception { }
 // PDOxSkinny based on DBIx::Skinny 0.04
 class PDOxSkinny
 {
-    private $dsn                = null;      // -- Str
-    private $username           = null;      // -- Str
-    private $password           = null;      // -- Str
-    private $connect_options    = array( );  // -- Hash
-    private $dbh                = null;      // -- Object[PDO]
-    private $dbd                = null;      // -- Object
-    private $schema             = null;      // -- Object[SkinnySchema]
-    private $profiler           = null;      // -- Object[SkinnyProfiler]
-    private $profile            = false;     // -- Bool
-    private $logfile            = null;      // -- Str
-    private $active_transaction = false;     // -- Bool
-    private $mixins             = array( );  // -- Hash
-    private $is_error           = false;     // -- Bool
-    private $error_msg          = null;      // -- Str
-    private $raise_error        = false;     // -- Bool
-    private $in_storage         = false;     // -- Bool
+    public    $dbh                = null;      // -- Object[PDO]
+    public    $schema             = null;      // -- Object[SkinnySchema]
+    public    $is_error           = false;     // -- Bool
+    public    $error_msg          = null;      // -- Str
+    public    $in_storage         = false;     // -- Bool
+    protected $dsn                = null;      // -- Str
+    protected $username           = null;      // -- Str
+    protected $password           = null;      // -- Str
+    protected $connect_options    = array( );  // -- Hash
+    protected $dbd                = null;      // -- Object
+    protected $profiler           = null;      // -- Object[SkinnyProfiler]
+    protected $profile            = false;     // -- Bool
+    protected $logfile            = null;      // -- Str
+    protected $active_transaction = false;     // -- Bool
+    protected $mixins             = array( );  // -- Hash
+    protected $raise_error        = false;     // -- Bool
 
 
     function __construct ($args=array( ))
@@ -673,7 +673,7 @@ class PDOxSkinny
     }
 
 
-    private function dbd_type ($dsn)
+    protected function dbd_type ($dsn)
     {
         if ( !preg_match('/^(.+):/', $dsn, $m) ) {
             trigger_error("unknown db type: $dsn", E_USER_ERROR);
@@ -692,7 +692,7 @@ class PDOxSkinny
     }
 
 
-    private function get_sth_iterator ($sql, $sth, $opt_table_info)
+    protected function get_sth_iterator ($sql, $sth, $opt_table_info)
     {
         $table = $this->guess_table_name($sql);
 
@@ -705,7 +705,7 @@ class PDOxSkinny
     }
 
 
-    private function guess_table_name ($sql)
+    protected function guess_table_name ($sql)
     {
         $sql = str_replace(array("\r\n", "\n", "\r"), ' ', $sql);
 
@@ -717,7 +717,7 @@ class PDOxSkinny
     }
 
 
-    private function mk_row_class ($table)
+    protected function mk_row_class ($table)
     {
         $row_class = get_class($this).'Row';
 
@@ -733,13 +733,13 @@ class PDOxSkinny
     }
 
 
-    private function camelize ($str)
+    protected function camelize ($str)
     {
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $str)));
     }
 
 
-    private function quote ($label)
+    protected function quote ($label)
     {
         $quote    = $this->dbd->quote( );
         $name_sep = $this->dbd->name_sep( );
@@ -760,7 +760,7 @@ class PDOxSkinny
     }
 
 
-    private function add_where ($stmt, $where)
+    protected function add_where ($stmt, $where)
     {
         foreach ($where as $col => $val) {
             $stmt->add_where( array($col => $val) );
@@ -770,7 +770,7 @@ class PDOxSkinny
     }
 
 
-    private function execute ($stmt, $bind)
+    protected function execute ($stmt, $bind)
     {
         $this->is_error  = false;
         $this->error_msg = null;
@@ -789,7 +789,7 @@ class PDOxSkinny
     }
 
 
-    private function stack_trace ($sth, $stmt, $bind, $reason)
+    protected function stack_trace ($sth, $stmt, $bind, $reason)
     {
         if ($sth) {
             $this->close_sth($sth);
@@ -820,7 +820,7 @@ BIND    : %s
     }
 
 
-    private function ref ($val)
+    protected function ref ($val)
     {
         if ( !is_array($val) ) {
             return 'SCALAR';

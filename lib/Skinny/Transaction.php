@@ -1,11 +1,11 @@
-<?php  // vim: ts=4 sts=4 sw=4
+<?php
 
 
 // SkinnyTransaction based on DBIx::Skinny 0.04
 class SkinnyTransaction
 {
-    private $status = false;  // -- Bool
-    private $skinny = null;   // -- Object
+    protected $status = false;  // -- Bool
+    protected $skinny = null;   // -- Object
 
 
     function __construct ($skinny)
@@ -14,6 +14,20 @@ class SkinnyTransaction
         $this->skinny = $skinny;
 
         $skinny->txn_begin( );
+    }
+
+
+    function __get ($name)
+    {
+        switch ($name) {
+        case 'rollback': break;
+        case 'commit':   break;
+
+        default:
+            trigger_error("call unknown method: $name", E_USER_ERROR);
+        }
+
+        return $this->$name( );
     }
 
 

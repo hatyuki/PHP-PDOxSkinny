@@ -1,13 +1,13 @@
-<?php  // vim: ts=4 sts=4 sw=4
+<?php
 require_once 'Skinny.php';
 
 
 // SkinnyProfiler based on DBIx::Skinny 0.04
 class SkinnyProfiler
 {
-    public  $query_log = array( );  // -- Array
-    private $mode      = 0;         // -- Int
-    private $logfile   = null;
+    public    $query_log = array( );  // -- Array
+    protected $mode      = 0;         // -- Int
+    protected $logfile   = null;
 
 
     function __construct ($mode=0, $logfile=null)
@@ -48,7 +48,7 @@ class SkinnyProfiler
     }
 
 
-    private function normalize ($sql)
+    protected function normalize ($sql)
     {
         $sql = preg_replace('/^\s*/',    '', $sql);
         $sql = preg_replace('/\s*$/',    '', $sql);
@@ -59,7 +59,7 @@ class SkinnyProfiler
     }
 
 
-    private function join_bind ($val, $key)
+    protected function join_bind ($val, $key)
     {
         $val = is_null($val) ? 'null' : $val;
 

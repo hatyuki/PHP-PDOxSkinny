@@ -1,14 +1,14 @@
-<?php  // vim: ts=4 sts=4 sw=4
+<?php
 
 
 // SkinnySchema based on DBIx::Skinny 0.04
 class SkinnySchema
 {
-    public  $schema_info      = array( );  // -- Hash
-    private $installing_table = null;      // -- String
-    private $common_triggers  = array( );  // -- Array
-    private $inflate_rules    = array( );  // -- Hash
-    private $installing_rule  = null;      // -- String
+    public    $schema_info      = array( );  // -- Hash
+    protected $installing_table = null;      // -- String
+    protected $common_triggers  = array( );  // -- Array
+    protected $inflate_rules    = array( );  // -- Hash
+    protected $installing_rule  = null;      // -- String
 
 
     function install_table ($table, $install_code)
@@ -125,7 +125,7 @@ class SkinnySchema
     }
 
 
-    private function do_inflate ($key, $col, $data)
+    protected function do_inflate ($key, $col, $data)
     {
         $inflate_rules = $this->inflate_rules;
 

@@ -4,23 +4,23 @@
 // SkinnySQL based on DBIx::Skinny 0.04
 class SkinnySQL
 {
-    private $select             = array( );  // -- Array
-    private $distinct           = false;     // -- Bool
-    private $select_map         = array( );  // -- Hash
-    private $select_map_reverse = array( );  // -- Hash
-    private $from               = array( );  // -- Array
-    private $joins              = array( );  // -- Array
-    private $where              = array( );  // -- Array
-    private $bind               = array( );  // -- Array
-    private $group              = array( );  // -- Array
-    private $order              = array( );  // -- Array
-    private $having             = array( );  // -- Array
-    private $where_values       = array( );  // -- Hash
-    private $index_hint         = array( );  // -- Hash
-    private $limit              = null;      // -- Int
-    private $offset             = null;      // -- Int
-    private $comment            = null;      // -- Str
-    private $skinny             = null;      // -- Object
+    protected $select             = array( );  // -- Array
+    protected $distinct           = false;     // -- Bool
+    protected $select_map         = array( );  // -- Hash
+    protected $select_map_reverse = array( );  // -- Hash
+    protected $from               = array( );  // -- Array
+    protected $joins              = array( );  // -- Array
+    protected $where              = array( );  // -- Array
+    protected $bind               = array( );  // -- Array
+    protected $group              = array( );  // -- Array
+    protected $order              = array( );  // -- Array
+    protected $having             = array( );  // -- Array
+    protected $where_values       = array( );  // -- Hash
+    protected $index_hint         = array( );  // -- Hash
+    protected $limit              = null;      // -- Int
+    protected $offset             = null;      // -- Int
+    protected $comment            = null;      // -- Str
+    protected $skinny             = null;      // -- Object
 
 
     function __construct ($args=array( ))
@@ -48,7 +48,7 @@ class SkinnySQL
     function bind ( ) { return $this->bind; }
 
 
-    private function skinny ($skinny=null)
+    protected function skinny ($skinny=null)
     {
         $this->skinny = $skinny;
     }
@@ -452,7 +452,7 @@ class SkinnySQL
     }
 
 
-    private function _add_index_hint ($tbl_name)
+    protected function _add_index_hint ($tbl_name)
     {
         $hint = @$this->index_hint[$tbl_name];
 
@@ -472,7 +472,7 @@ class SkinnySQL
     }
 
 
-    private function set_alias ($args)
+    protected function set_alias ($args)
     {
         if ( array_key_exists($args, $this->select_map) && !empty($this->select_map[$args]) ) {
             $alias = $this->select_map[$args];
@@ -486,13 +486,13 @@ class SkinnySQL
     }
 
 
-    private function set_attribute ($args)
+    protected function set_attribute ($args)
     {
         return $args['column'].(@$args['desc'] ? (' '.$args['desc']) : '');
     }
 
 
-    private function mk_term ($col, $val)
+    protected function mk_term ($col, $val)
     {
         $term = '';
         $bind = array( );
@@ -570,7 +570,7 @@ class SkinnySQL
     }
 
 
-    private function parse_array_terms ($terms_list)
+    protected function parse_array_terms ($terms_list)
     {
         $out   = array( );
         $logic = 'AND';
@@ -627,7 +627,7 @@ class SkinnySQL
     }
 
 
-    private function ref ($val)
+    protected function ref ($val)
     {
         if ( !is_array($val) ) {
             return 'SCALAR';

@@ -1,19 +1,19 @@
-<?php  // vim: ts=4 sts=4 sw=4
+<?php
 require_once 'Skinny/Row.php';
 
 
 // SkinnyIterator based on DBIx::Skinny 0.04
 class SkinnyIterator
 {
-    private $skinny         = null;      // -- Object
-    private $sth            = null;      // -- Object
-    private $data           = null;      // -- Array
-    private $opt_table_info = null;      // -- Str
-    private $row_class      = null;      // -- Str
-    private $base_row_class = null;
-    private $position       = 0;         // -- Int
-    private $rows_cache     = array( );  // -- Array
-    private $cache          = true;      // -- Bool
+    protected $skinny         = null;      // -- Object
+    protected $sth            = null;      // -- Object
+    protected $data           = null;      // -- Array
+    protected $opt_table_info = null;      // -- Str
+    protected $row_class      = null;      // -- Str
+    protected $base_row_class = null;
+    protected $position       = 0;         // -- Int
+    protected $rows_cache     = array( );  // -- Array
+    protected $cache          = true;      // -- Bool
 
 
     function __construct ($args)
