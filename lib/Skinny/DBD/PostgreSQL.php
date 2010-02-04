@@ -14,11 +14,11 @@ class SkinnyDriverPostgreSQL
     function last_insert_id ($skinny, $table)
     {
         $schema = $skinny->schema( )->schema_info[$table];
-        $seq = @$schema['seq']
-             ?  $schema['seq']
-             :  $table.'_'.$schema['pk'].'_seq';
+        $seq    = isset($schema['seq'])
+                ? $schema['seq']
+                : $table.'_'.$schema['pk'].'_seq';
 
-        return $skinny->dbh( )->lastInsertId($seq);
+        return $skinny->dbh->lastInsertId($seq);
     }
 
 

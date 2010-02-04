@@ -35,7 +35,12 @@ class SkinnyRow
     function __call ($name, $null)
     {
         if ( !in_array($name, $this->select_columns) ) {
-            trigger_error("unknown column: $name", E_USER_ERROR);
+			$trace = debug_backtrace( );
+			$trace = $trace[0];
+			$trace = 'at '.$trace['file'].' line '.$trace['line'];
+			trigger_error(
+				"$trace\nunknown column: $name", E_USER_ERROR
+			);
         }
 
         $col = $this->get_column_cached[$name];
@@ -47,7 +52,12 @@ class SkinnyRow
     function __get ($name)
     {
         if ( !in_array($name, $this->select_columns) ) {
-            trigger_error("unknown column: $name", E_USER_ERROR);
+			$trace = debug_backtrace( );
+			$trace = $trace[0];
+			$trace = 'at '.$trace['file'].' line '.$trace['line'];
+			trigger_error(
+				"$trace\nunknown column: $name", E_USER_ERROR
+			);
         }
 
         $col = $this->get_column_cached[$name];

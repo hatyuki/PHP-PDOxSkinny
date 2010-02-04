@@ -32,6 +32,7 @@ class PDOxSkinny
     public    $is_error           = false;     // -- Bool
     public    $error_msg          = null;      // -- Str
     public    $in_storage         = false;     // -- Bool
+    public    $raise_error        = false;     // -- Bool
     protected $dsn                = null;      // -- Str
     protected $username           = null;      // -- Str
     protected $password           = null;      // -- Str
@@ -42,7 +43,6 @@ class PDOxSkinny
     protected $logfile            = null;      // -- Str
     protected $active_transaction = false;     // -- Bool
     protected $mixins             = array( );  // -- Hash
-    protected $raise_error        = false;     // -- Bool
 
 
     function __construct ($args=array( ))
@@ -59,7 +59,7 @@ class PDOxSkinny
             );
         }
         else if ( !empty($args) ) {
-            $schema = array_key_exists('schema', $args)
+            $schema = isset($args['schema'])
                     ? $args['schema']
                     : get_class($this).'Schema';
 
@@ -71,19 +71,19 @@ class PDOxSkinny
                 $this->schema->register_schema( );
             }
 
-            $this->raise_error = array_key_exists('raise_error', $args)
+            $this->raise_error = isset($args['raise_error'])
                                ? $args['raise_error']
                                : false;
 
-            $this->profile = array_key_exists('profile', $args)
+            $this->profile = isset($args['profile'])
                            ?  $args['profile']
                            : @$_SERVER['SKINNY_PROFILE'];
 
-            if ( array_key_exists('query_log', $args) ) {
+            if ( isset($args['query_log']) ) {
                 $this->logfile = $args['query_log'];
             }
             else {
-                $this->logfile = array_key_exists('SKINNY_LOG', $_SERVER)
+                $this->logfile = isset($_SERVER['SKINNY_LOG'])
                                ? $_SERVER['SKINNY_LOG']
                                : getcwd( ).'/database.log';
             }
@@ -324,7 +324,7 @@ class PDOxSkinny
         $res = $rs->retrieve( )->first( );
 
         return $res
-             ? $res->cnt( )
+             ? intval( $res->cnt( ) )
              : 0;
     }
 
@@ -401,7 +401,13 @@ class PDOxSkinny
     {
         $opt['limit'] = 1;
 
-        return $this->search($table, $where, $opt)->first( );
+        $itr = $this->search($table, $where, $opt);
+
+        if ($this->is_error) {
+            return null;
+        }
+
+        return $itr->first( );
     }
 
 
@@ -410,6 +416,11 @@ class PDOxSkinny
         $this->profiler($sql, $bind);
 
         $sth = $this->execute($sql, $bind);
+
+        if ($this->is_error) {
+            $this->close_sth($sth);
+            return null;
+        }
 
         return $this->get_sth_iterator($sql, $sth, $opt_table_info);
     }
@@ -499,18 +510,24 @@ class PDOxSkinny
         $this->profiler($sql, $bind);
 
         $sth = $this->execute($sql, $bind);
-        $pk  = $this->schema->schema_info[$table]['pk'];
-        $id  = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
+
+        if ($this->is_error) {
+            $this->close_sth($sth);
+            return null;
+        }
+
+        $pk = $this->schema->schema_info[$table]['pk'];
+        $id = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
 
         $this->close_sth($sth);
 
-        $obj = $this->search($table, array(
+        $row = $this->single($table, array(
             $schema->schema_info[$table]['pk'] => $id
-        ) )->first( );
+        ) );
 
-        $this->call_schema_trigger('post_insert', $schema, $table, $obj);
+        $this->call_schema_trigger('post_insert', $schema, $table, $row);
 
-        return $obj;
+        return $row;
     }
 
 
@@ -558,7 +575,7 @@ class PDOxSkinny
         foreach ($values as $col => $val) {
             $quoted_col = $this->quote($col, $quote, $name_sep);
 
-            if ( $this->ref($val) == 'ARRAY' && array_key_exists('inject', $val) ) {
+            if ( $this->ref($val) == 'ARRAY' && isset($val['inject']) ) {
                 $set[ ] = "$quoted_col $val";
             }
             else if ($this->ref($val) == 'SCALAR') {
@@ -588,6 +605,10 @@ class PDOxSkinny
         $sth = $this->dbh->prepare($sql);
         $sth->execute($bind);
         $this->close_sth($sth);
+
+        if ($this->is_error) {
+            return null;
+        }
 
         $itr = $this->search($table, $where);
         while ( $row = $itr->next( ) ) {
@@ -622,6 +643,11 @@ class PDOxSkinny
         $sql  = 'DELETE '.$stmt->as_sql( );
         $this->profiler($sql, $stmt->bind( ));
         $sth  = $this->execute($sql, $stmt->bind( ));
+
+        if ($this->is_error) {
+            $this->close_sth($sth);
+            return null;
+        }
 
         $this->call_schema_trigger('post_delete', $schema, $table);
 
@@ -847,7 +873,7 @@ BIND    : %s
      */
     function __call ($method, $args)
     {
-        if ( array_key_exists($method, $this->mixins) ) {
+        if ( isset($this->mixins[$method]) ) {
             $func = $this->mixins[$method];
             return call_user_func_array($func, $args);
         }
