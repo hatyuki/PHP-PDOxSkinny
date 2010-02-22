@@ -34,6 +34,9 @@ class SkinnySQL
     function __call ($name, $args)
     {
         if ( !array_key_exists($name, get_object_vars($this)) ) {
+            $trace = debug_backtrace( );
+            $trace = $trace[1];
+            var_dump( $trace );
             trigger_error("Cannot access property: $name", E_USER_ERROR);
         }
 
@@ -260,12 +263,20 @@ class SkinnySQL
                 }
 
                 foreach ($joins as $join) {
+                    if ($this->ref($join['condition']) == 'ARRAY') {
+                        $mode = ' USING ';
+                        $join['condition'] = join(', ', $join['condition']);
+                    }
+                    else {
+                        $mode = ' ON ';
+                    }
+
                     $sql .= ' '
                          .strtoupper($join['type'])
                          .' JOIN '
                          .$join['table']
-                         .' ON '
-                         .$join['condition'];
+                         .$mode
+                         .'('.$join['condition'].')';
                 }
             }
 
@@ -399,18 +410,18 @@ class SkinnySQL
         }
 
         if ($this->ref($args) == 'HASH') {
-			foreach ($args as $col => $val) {
-				list($term, $bind, $tcol) = $this->mk_term($col, $val);
+            foreach ($args as $col => $val) {
+                list($term, $bind, $tcol) = $this->mk_term($col, $val);
 
-				$this->where[ ] = '('.$term.')';
-				$this->bind = array_merge_recursive($this->bind, $bind);
+                $this->where[ ] = '('.$term.')';
+                $this->bind = array_merge_recursive($this->bind, $bind);
 
-				$this->where_values[$tcol] = $val;
-			}
-		}
-		else {
+                $this->where_values[$tcol] = $val;
+            }
+        }
+        else {
             trigger_error('argument must be hash', E_USER_ERROR);
-		}
+        }
 
         return $this;
     }
@@ -545,6 +556,18 @@ class SkinnySQL
             }
             else if ($op == 'inject') {
                 $term = $col.' '.$val[$op];
+            }
+            else if ( ($c == 'or' || $c == 'and') && $this->ref($val) == 'HASH') {
+                $logic = strtoupper($c);
+                $terms = array( );
+
+                foreach ($val as $c2 => $v2) {
+                    list($t, $b) = $this->mk_term($c2, $v2);
+                    $terms[ ] = '('.$t.')';
+                    $bind = array_merge_recursive($bind, $b);
+                }
+
+                $term = join(" $logic ", $terms);
             }
             else {
                 $op = strtoupper($op);
