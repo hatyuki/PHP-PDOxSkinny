@@ -52,8 +52,8 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
         $res = ''
              .'FROM foo '
-             .'INNER JOIN baz b1 ON foo.baz_id = b1.baz_id AND b1.quux_id = 1 '
-             .'LEFT JOIN baz b2 ON foo.baz_id = b2.baz_id AND b2.quux_id = 2';
+             .'INNER JOIN baz b1 ON (foo.baz_id = b1.baz_id AND b1.quux_id = 1) '
+             .'LEFT JOIN baz b2 ON (foo.baz_id = b2.baz_id AND b2.quux_id = 2)';
 
         $this->assertEquals($res."\n", $obj->as_sql( ));
     }
@@ -86,8 +86,8 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
         $res = ''
              .'FROM foo '
-             .'INNER JOIN baz b1 ON foo.baz_id = b1.baz_id AND b1.quux_id = 1 '
-             .'LEFT JOIN baz b2 ON foo.baz_id = b2.baz_id AND b2.quux_id = 2';
+             .'INNER JOIN baz b1 ON (foo.baz_id = b1.baz_id AND b1.quux_id = 1) '
+             .'LEFT JOIN baz b2 ON (foo.baz_id = b2.baz_id AND b2.quux_id = 2)';
         $this->assertEquals($res."\n", $obj->as_sql( ));
 
 
@@ -104,9 +104,9 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
         $obj->add_join($join);
         $res = ''
             .'FROM foo '
-            .'INNER JOIN baz b1 ON foo.baz_id = b1.baz_id AND b1.quux_id = 1 '
-            .'LEFT JOIN baz b2 ON foo.baz_id = b2.baz_id AND b2.quux_id = 2 '
-            .'INNER JOIN foo f1 ON f1.quux_id = quux.q_id';
+            .'INNER JOIN baz b1 ON (foo.baz_id = b1.baz_id AND b1.quux_id = 1) '
+            .'LEFT JOIN baz b2 ON (foo.baz_id = b2.baz_id AND b2.quux_id = 2) '
+            .'INNER JOIN foo f1 ON (f1.quux_id = quux.q_id)';
         $this->assertEquals($res."\n", $obj->as_sql( ));
     }
 
@@ -475,7 +475,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
                 'condition' => 'baz.baz_id = foo.baz_id',
             )
         ) );
-        $this->assertEquals("SELECT foo\nFROM baz USE INDEX (index_hint) INNER JOIN baz ON baz.baz_id = foo.baz_id\n", $obj->as_sql( ));
+        $this->assertEquals("SELECT foo\nFROM baz USE INDEX (index_hint) INNER JOIN baz ON (baz.baz_id = foo.baz_id)\n", $obj->as_sql( ));
 
         $obj->from( array( ) );
         $obj->joins( array( ) );
@@ -493,6 +493,6 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
                 ),
             )
         ) );
-        $this->assertEquals("SELECT foo\nFROM baz USE INDEX (index_hint) INNER JOIN baz b1 ON baz.baz_id = b1.baz_id AND b1.quux_id = 1 LEFT JOIN baz b2 ON baz.baz_id = b2.baz_id AND b2.quux_id = 2\n", $obj->as_sql( ));
+        $this->assertEquals("SELECT foo\nFROM baz USE INDEX (index_hint) INNER JOIN baz b1 ON (baz.baz_id = b1.baz_id AND b1.quux_id = 1) LEFT JOIN baz b2 ON (baz.baz_id = b2.baz_id AND b2.quux_id = 2)\n", $obj->as_sql( ));
     }
 }

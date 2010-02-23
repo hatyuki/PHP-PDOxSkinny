@@ -105,7 +105,7 @@ class SkinnySQL
             }
 
             if ( is_array($this->select) ) {
-                $this->select[ ] = $term;
+                $this->select[ ] = $terms;
             }
             else {
                 $this->select = array($this->select, $term);
