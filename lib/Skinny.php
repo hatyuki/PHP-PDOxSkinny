@@ -236,6 +236,8 @@ class PDOxSkinny
                     $this->dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
                 }
 
+                $this->profiler('CONNECT TO: '.$this->dsn);
+
                 foreach ($on_connect_do as $sql) {
                     if ( empty($sql) ) {
                         continue;

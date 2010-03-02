@@ -10,7 +10,7 @@ class TestSkinnyProfiler extends PHPUnit_Framework_TestCase
 
     function setUp ( )
     {
-        $this->class = new SkinnyProfiler( );
+        $this->class = new SkinnyProfiler(1);
     }
 
     function testRecordQuery ( )
