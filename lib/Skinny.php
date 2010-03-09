@@ -75,9 +75,12 @@ class PDOxSkinny
                                ? $args['raise_error']
                                : false;
 
-            $this->profile = isset($args['profile'])
-                           ?  $args['profile']
-                           : @$_SERVER['SKINNY_PROFILE'];
+            if ( isset($args['profile']) ) {
+                $this->profile = $args['profile'];
+            }
+            else if ( isset($_SERVER['SKINNY_PROFILE']) ) {
+                $this->profile = $_SERVER['SKINNY_PROFILE'];
+            }
 
             if ( isset($args['query_log']) ) {
                 $this->logfile = $args['query_log'];
@@ -148,7 +151,7 @@ class PDOxSkinny
     function txn_begin ( )
     {
         $this->active_transaction = true;
-
+        $this->profiler('BEGIN TRANSACTION');
         return $this->dbh->beginTransaction( );
     }
 
@@ -160,7 +163,7 @@ class PDOxSkinny
         }
 
         $this->dbh->rollBack( );
-
+        $this->profiler('ROLLBACK TRANSACTION');
         return $this->txn_end( );
     }
 
@@ -172,7 +175,7 @@ class PDOxSkinny
         }
 
         $this->dbh->commit( );
-
+        $this->profiler('COMMIT TRANSACTION');
         return $this->txn_end( );
     }
 
@@ -190,12 +193,25 @@ class PDOxSkinny
      */
     function connect_info ($connect_info)
     {
-        $this->dsn             = @$connect_info['dsn'];
-        $this->username        = @$connect_info['username'];
-        $this->password        = @$connect_info['password'];
-        $this->connect_options = @$connect_info['connect_options'];
+        $this->dsn = isset($connect_info['dsn'])
+                   ? $connect_info['dsn']
+                   : null;
 
-        $this->connect_options['on_connect_do'] = @$connect_info['on_connect_do'];
+        $this->username = isset($connect_info['username'])
+                        ? $connect_info['username']
+                        : null;
+
+        $this->password = isset($connect_info['password'])
+                        ? $connect_info['password']
+                        : null;
+
+        $this->connect_options = isset($connect_info['connect_options'])
+                               ? $connect_info['connect_options']
+                               : null;
+
+        $this->connect_options['on_connect_do'] = isset($connect_info['on_connect_do'])
+                                                ? $connect_info['on_connect_do']
+                                                : null;
 
         if ( !$this->dsn ) {
             trigger_error('require dsn', E_USER_ERROR);
@@ -224,9 +240,9 @@ class PDOxSkinny
                 $this->dbh = new PDO($this->dsn, $this->username, $this->password);
                 $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                $auto_commit = @$this->connect_options['AutoCommit']
-                             ? true
-                             : false;
+                $auto_commit = isset($this->connect_options['AutoCommit'])
+                             ? $this->connect_options['AutoCommit']
+                             : true;
 
                 $on_connect_do = is_array($this->connect_options['on_connect_do'])
                                ? $this->connect_options['on_connect_do']
@@ -239,10 +255,7 @@ class PDOxSkinny
                 $this->profiler('CONNECT TO: '.$this->dsn);
 
                 foreach ($on_connect_do as $sql) {
-                    if ( empty($sql) ) {
-                        continue;
-                    }
-
+                    if ( empty($sql) ) { continue; }
                     $this->query($sql);
                 }
             }
@@ -289,14 +302,12 @@ class PDOxSkinny
     /* ---------------------------------------------------------------
      * Executor
      */
-    function query ($sql)  // do method on DBIx::Skinny
+    function query ($sql)
     {
         $this->is_error  = false;
         $this->error_msg = null;
 
-        if ( empty($sql) ) {
-            return null;
-        }
+        if ( empty($sql) ) { return; }
 
         $this->profiler($sql);
 
@@ -304,12 +315,7 @@ class PDOxSkinny
             $res = $this->dbh->query($sql);
         }
         catch (Exception $e) {
-            $this->is_error  = true;
-            $this->error_msg = $e->getMessage( );
-
-            if ($this->raise_error) {
-                throw new SkinnyException($e->getMessage( ), Skinny::EXECUTE_ERROR);
-            }
+            $this->stack_trace(null, $sql, array( ), $e);
         }
 
         return $res;
@@ -343,11 +349,13 @@ class PDOxSkinny
 
     function search ($table=null, $where=array( ), $opt=array( ))
     {
-        $cols = @$opt['select']
-              ?  $opt['select']
-              : @$this->schema->schema_info[$table]['columns'];
-
-        if ( empty($cols) ) {
+        if ( isset($opt['select']) ) {
+            $cols = $opt['select'];
+        }
+        else if ( isset($this->schema->schema_info[$table]['columns']) ) {
+            $cols = $this->schema->schema_info[$table]['columns'];
+        }
+        else {
             $cols = array('*');
         }
 
@@ -360,14 +368,16 @@ class PDOxSkinny
             $this->add_where($rs, $where);
         }
 
-        if ( @$opt['limit'] ) {
+        if ( isset($opt['limit']) ) {
             $rs->limit( $opt['limit'] );
         }
-        if ( @$opt['offset'] ) {
+        if ( isset($opt['offset']) ) {
             $rs->offset( $opt['offset'] );
         }
 
-        if ( $terms = @$opt['order_by'] ) {
+        if ( isset($opt['order_by']) ) {
+            $terms = $opt['order_by'];
+
             if ($this->ref($terms) != 'ARRAY') {
                 $terms = array($terms);
             }
@@ -389,7 +399,9 @@ class PDOxSkinny
             $rs->order($orders);
         }
 
-        if ( $terms = @$opt['having'] ) {
+        if ( isset($opt['having']) ) { 
+            $terms = $opt['having'];
+
             foreach ($terms as $col => $val) {
                 $rs->add_having( array($col => $val) );
             }
@@ -405,9 +417,7 @@ class PDOxSkinny
 
         $itr = $this->search($table, $where, $opt);
 
-        if ($this->is_error) {
-            return null;
-        }
+        if ($this->is_error) { return; }
 
         return $itr->first( );
     }
@@ -415,20 +425,17 @@ class PDOxSkinny
 
     function search_by_sql ($sql, $bind=array( ), $opt_table_info=null)
     {
-        $this->profiler($sql, $bind);
-
         $sth = $this->execute($sql, $bind);
 
         if ($this->is_error) {
             $this->close_sth($sth);
-            return null;
+            return;
         }
 
         return $this->get_sth_iterator($sql, $sth, $opt_table_info);
     }
 
 
-    // row クラスを作るだけで DB に対しては何もしない
     function find_or_new ($table, $cond, $args=array( ))
     {
         $row = $this->single($table, $cond);
@@ -500,6 +507,9 @@ class PDOxSkinny
             if ( is_bool($val) ) {
                 $bind[ ] = $val ? 'TRUE' : 'FALSE';
             }
+            else if ( is_null($val) ) {
+                $bind[ ] = 'NULL';
+            }
             else {
                 $bind[ ] = $val;
             }
@@ -509,19 +519,14 @@ class PDOxSkinny
         $sql .= '('.join(', ', array_map(array($this, 'quote'), $cols)).")\n";
         $sql .= 'VALUES ('.join(', ', array_fill(0, sizeof($cols), '?')).")\n";
 
-        $this->profiler($sql, $bind);
-
         $sth = $this->execute($sql, $bind);
+        $this->close_sth($sth);
 
-        if ($this->is_error) {
-            $this->close_sth($sth);
-            return null;
-        }
+        if ($this->is_error) { return; }
 
-        $pk = $this->schema->schema_info[$table]['pk'];
+        $pk = $schema->schema_info[$table]['pk'];
         $id = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
 
-        $this->close_sth($sth);
 
         $row = $this->single($table, array(
             $schema->schema_info[$table]['pk'] => $id
@@ -586,6 +591,9 @@ class PDOxSkinny
                 if ( is_bool($val) ) {
                     $bind[ ] = $val ? 'TRUE' : 'FALSE';
                 }
+                else if ( is_null() ) {
+                    $bind[ ] = 'NULL';
+                }
                 else {
                     $bind[ ] = $val;
                 }
@@ -602,15 +610,10 @@ class PDOxSkinny
 
         $sql = "UPDATE $table SET ".join(', ', $set).' '.$stmt->as_sql_where( );
 
-        $this->profiler($sql, $bind);
-
-        $sth = $this->dbh->prepare($sql);
-        $sth->execute($bind);
+        $sth = $this->execute($sql, $bind);
         $this->close_sth($sth);
 
-        if ($this->is_error) {
-            return null;
-        }
+        if ($this->is_error) { return; }
 
         $itr = $this->search($table, $where);
         while ( $row = $itr->next( ) ) {
@@ -623,14 +626,10 @@ class PDOxSkinny
 
     function update_by_sql ($sql, $bind)
     {
-        $this->profiler($sql, $bind);
-
-        $sth  = $this->dbh->prepare($sql);
-        $rows = $sth->execute($bind);
-
+        $sth = $this->execute($sql, $bind);
         $this->close_sth($sth);
 
-        return $rows;
+        return !$this->is_error;
     }
 
 
@@ -643,12 +642,11 @@ class PDOxSkinny
         $stmt = $this->resultset( array('from' => $table) );
         $this->add_where($stmt, $where);
         $sql  = 'DELETE '.$stmt->as_sql( );
-        $this->profiler($sql, $stmt->bind( ));
         $sth  = $this->execute($sql, $stmt->bind( ));
 
         if ($this->is_error) {
             $this->close_sth($sth);
-            return null;
+            return;
         }
 
         $this->call_schema_trigger('post_delete', $schema, $table);
@@ -662,12 +660,10 @@ class PDOxSkinny
 
     function delete_by_sql ($sql, $bind)
     {
-        $this->profiler($sql, $bind);
-        $sth = $this->dbh->prepare($sql);
-        $ret = $sth->execute($bind);
+        $sth = $this->execute($sql, $bind);
         $this->close_sth($sth);
 
-        return $ret;
+        return !$this->is_error;
     }
 
 
@@ -803,6 +799,8 @@ class PDOxSkinny
         $this->is_error  = false;
         $this->error_msg = null;
 
+        $this->profiler($stmt, $bind);
+
         try {
             $sth = $this->dbh->prepare(
                 $stmt, array(PDO::CURSOR_SCROLL => PDO::ATTR_CURSOR)
@@ -819,18 +817,13 @@ class PDOxSkinny
 
     protected function stack_trace ($sth, $stmt, $bind, $reason)
     {
-        if ($sth) {
-            $this->close_sth($sth);
-        }
+        if ($sth) { $this->close_sth($sth); }
 
         $reason = preg_replace("/\n/", "\n          ", $reason->getMessage( ));
-
-        $stmt = preg_replace("/\n/", "\n          ", $stmt);
-
-        $bind = print_r($bind, true);
-        $bind = preg_replace("/\n/", "\n          ", $bind);
-
-        $text = "Trace Error:
+        $stmt   = preg_replace("/\n/", "\n          ", $stmt);
+        $bind   = print_r($bind, true);
+        $bind   = preg_replace("/\n/", "\n          ", $bind);
+        $text   = "Trace Error:
 ***************************  PDOxSkinny's Exception  ***************************
 Reason  : %s
 SQL     : %s

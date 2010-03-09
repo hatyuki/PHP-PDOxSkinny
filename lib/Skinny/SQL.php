@@ -465,7 +465,9 @@ class SkinnySQL
 
     protected function _add_index_hint ($tbl_name)
     {
-        $hint = @$this->index_hint[$tbl_name];
+        $hint = isset($this->index_hint[$tbl_name])
+              ? $this->index_hint[$tbl_name]
+              : null;
 
         if ( !($hint && $this->ref($hint) == 'HASH') ) {
             return $tbl_name;
@@ -499,7 +501,7 @@ class SkinnySQL
 
     protected function set_attribute ($args)
     {
-        return $args['column'].(@$args['desc'] ? (' '.$args['desc']) : '');
+        return $args['column'].(isset($args['desc']) ? (' '.$args['desc']) : '');
     }
 
 
@@ -641,7 +643,9 @@ class SkinnySQL
     function retrieve ($table=null)
     {
         if ( !$table ) {
-            $table = @$this->from[0];
+            $table = isset($this->from[0])
+                   ? $this->from
+                   : null;
         }
 
         return $this->skinny->search_by_sql(

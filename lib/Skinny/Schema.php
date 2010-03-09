@@ -61,19 +61,29 @@ class SkinnySchema
 
     function call_trigger ($skinny, &$table, $trigger_name, &$args)
     {
-        $common_triggers = @$this->common_triggers[$trigger_name];
-        if ( !empty($common_triggers) ) {
-            foreach ($common_triggers as $callback) {
-                $func_args = array(&$skinny, &$args, &$table);
-                call_user_func_array($callback, $func_args);
+        if ( !isset($this->schema_info[$table]) ) {
+            trigger_error("schema(table) not defined: $table", E_USER_ERROR);
+        }
+
+        if ( isset($this->common_triggers[$trigger_name]) ) {
+            $common_triggers = $this->common_triggers[$trigger_name];
+
+            if ( !empty($common_triggers) ) {
+                foreach ($common_triggers as $callback) {
+                    $func_args = array(&$skinny, &$args, &$table);
+                    call_user_func_array($callback, $func_args);
+                }
             }
         }
 
-        $triggers = @$this->schema_info[$table]['trigger'][$trigger_name];
-        if ( !empty($triggers) ) {
-            foreach ($triggers as $callback) {
-                $func_args = array(&$skinny, &$args, &$table);
-                call_user_func_array($callback, $func_args);
+        if ( isset($this->schema_info[$table]['trigger'][$trigger_name]) ) {
+            $triggers = $this->schema_info[$table]['trigger'][$trigger_name];
+
+            if ( !empty($triggers) ) {
+                foreach ($triggers as $callback) {
+                    $func_args = array(&$skinny, &$args, &$table);
+                    call_user_func_array($callback, $func_args);
+                }
             }
         }
     }
