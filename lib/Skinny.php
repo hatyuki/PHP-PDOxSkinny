@@ -508,7 +508,7 @@ class PDOxSkinny
                 $bind[ ] = $val ? 'TRUE' : 'FALSE';
             }
             else if ( is_null($val) ) {
-                $bind[ ] = 'NULL';
+                $bind[ ] = null;
             }
             else {
                 $bind[ ] = $val;
@@ -591,8 +591,8 @@ class PDOxSkinny
                 if ( is_bool($val) ) {
                     $bind[ ] = $val ? 'TRUE' : 'FALSE';
                 }
-                else if ( is_null() ) {
-                    $bind[ ] = 'NULL';
+                else if ( is_null($val) ) {
+                    $bind[ ] = null;
                 }
                 else {
                     $bind[ ] = $val;

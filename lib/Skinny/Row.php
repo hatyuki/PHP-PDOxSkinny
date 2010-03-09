@@ -128,6 +128,10 @@ class SkinnyRow
         $table = $table ? $table : $this->opt_table_info;
         $args  = $args  ? $args  : $this->get_dirty_columns( );
 
+        if ( is_array($table) ) {
+            $table = array_shift($table);
+        }
+
         $where  = $this->update_or_delete_cond($table);
         $result = $this->skinny->update($table, $args, $where);
 
@@ -156,9 +160,9 @@ class SkinnyRow
             trigger_error('no table info', E_USER_ERROR);
         }
 
-        $schema_info = $this->skinny->schema( )->schema_info;
+        $schema_info =& $this->skinny->schema( )->schema_info;
 
-        if ( !$schema_info[$table] ) {
+        if ( !isset($schema_info[$table]) ) {
             trigger_error("unknown table: $table", E_USER_ERROR);
         }
 
