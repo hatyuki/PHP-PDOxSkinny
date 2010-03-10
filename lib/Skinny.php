@@ -6,7 +6,7 @@ require_once 'Skinny/Transaction.php';
 
 class Skinny
 {
-    const VERSION = 0.04;
+    const VERSION = 0.06;
 
     // for SkinnyProfiler
     const TRACE_LOG = 1;
