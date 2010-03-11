@@ -27,22 +27,23 @@ class SkinnyException extends Exception { }
 // PDOxSkinny based on DBIx::Skinny 0.04
 class PDOxSkinny
 {
-    public    $dbh                = null;      // -- Object[PDO]
-    public    $schema             = null;      // -- Object[SkinnySchema]
-    public    $is_error           = false;     // -- Bool
-    public    $error_msg          = null;      // -- Str
-    public    $in_storage         = false;     // -- Bool
-    public    $raise_error        = false;     // -- Bool
-    protected $dsn                = null;      // -- Str
-    protected $username           = null;      // -- Str
-    protected $password           = null;      // -- Str
-    protected $connect_options    = array( );  // -- Hash
-    protected $dbd                = null;      // -- Object
-    protected $profiler           = null;      // -- Object[SkinnyProfiler]
-    protected $profile            = false;     // -- Bool
-    protected $logfile            = null;      // -- Str
-    protected $active_transaction = false;     // -- Bool
-    protected $mixins             = array( );  // -- Hash
+    public    $dbh                              = null;      // -- Object[PDO]
+    public    $schema                           = null;      // -- Object[SkinnySchema]
+    public    $is_error                         = false;     // -- Bool
+    public    $error_msg                        = null;      // -- Str
+    public    $in_storage                       = false;     // -- Bool
+    public    $raise_error                      = false;     // -- Bool
+    protected $dsn                              = null;      // -- Str
+    protected $username                         = null;      // -- Str
+    protected $password                         = null;      // -- Str
+    protected $connect_options                  = array( );  // -- Hash
+    protected $dbd                              = null;      // -- Object
+    protected $profiler                         = null;      // -- Object[SkinnyProfiler]
+    protected $profile                          = false;     // -- Bool
+    protected $logfile                          = null;      // -- Str
+    protected $active_transaction               = 0;         // -- Int
+    protected $rollbacked_in_nested_transaction = false;     // -- Int
+    protected $mixins                           = array( );  // -- Hash
 
 
     function __construct ($args=array( ))
@@ -137,21 +138,16 @@ class PDOxSkinny
      */
     function txn_scope ( )
     {
-        if ( $this->active_transaction ) {
-            trigger_error(
-                "The 'txn_scope' method can not be performed during a transaction",
-                E_USER_ERROR
-            );
-        }
-
         return new SkinnyTransaction($this);
     }
 
 
     function txn_begin ( )
     {
-        $this->active_transaction = true;
-        $this->profiler('BEGIN TRANSACTION');
+        if (++$this->active_transaction == 1) {
+            $this->profiler('BEGIN TRANSACTION');
+        }
+
         return $this->dbh->beginTransaction( );
     }
 
@@ -162,9 +158,18 @@ class PDOxSkinny
             return false;
         }
 
-        $this->dbh->rollBack( );
-        $this->profiler('ROLLBACK TRANSACTION');
-        return $this->txn_end( );
+        if ($this->active_transaction == 1) {
+            $this->profiler('ROLLBACK TRANSACTION');
+            $this->dbh->rollBack( );
+            return $this->txn_end( );
+        }
+        else if ($this->active_transaction > 1) {
+            $this->active_transaction--;
+            $this->rollbacked_in_nested_transaction = true;
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -174,15 +179,28 @@ class PDOxSkinny
             return false;
         }
 
-        $this->dbh->commit( );
+        if ($this->rollbacked_in_nested_transaction) {
+            trigger_error(
+                'tried to commit but already rollbacked in nested transaction',
+                E_USER_ERROR
+            );
+        }
+        else if ($this->active_transaction > 1) {
+            $this->active_transaction--;
+            return true;
+        }
+
         $this->profiler('COMMIT TRANSACTION');
+        $this->dbh->commit( );
+
         return $this->txn_end( );
     }
 
 
     function txn_end ( )
     {
-        $this->active_transaction = false;
+        $this->active_transaction = 0;
+        $this->rollbacked_in_nested_transaction = false;
 
         return $this;
     }
