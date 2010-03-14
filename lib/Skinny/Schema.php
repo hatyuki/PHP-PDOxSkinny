@@ -61,6 +61,10 @@ class SkinnySchema
 
     function call_trigger ($skinny, &$table, $trigger_name, &$args)
     {
+        if ( is_array($table) ) {
+            $table = array_shift($table);
+        }
+
         if ( !isset($this->schema_info[$table]) ) {
             trigger_error("schema(table) not defined: $table", E_USER_ERROR);
         }

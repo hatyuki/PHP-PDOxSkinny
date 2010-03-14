@@ -156,8 +156,12 @@ class SkinnyRow
 
     protected function update_or_delete_cond ($table)
     {
-        if ( !$table ) {
+        if ( empty($table) ) {
             trigger_error('no table info', E_USER_ERROR);
+        }
+
+        if ( is_array($table) ) {
+            $table = array_shift($table);
         }
 
         $schema_info =& $this->skinny->schema( )->schema_info;
