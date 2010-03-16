@@ -24,7 +24,7 @@ class SkinnyRow
             $col = strtolower( preg_replace('/.+\.(.+)/', "$1", $alias) );
 
             if ( !array_key_exists($col, $this->get_column_cached) ) {
-                $data = $this->get_column($col);
+                $data = $this->row_data[$col];
                 $this->get_column_cached[$col] =
                     $this->skinny->schema( )->call_inflate($col, $data);
             }
@@ -74,9 +74,13 @@ class SkinnyRow
 
     function get_column ($col)
     {
-        return $this->row_data[$col];
+        return $this->get_column_cached[$col];
     }
 
+    function get_raw_column ($col)
+    {
+        return $this->row_data[$col];
+    }
 
     function get_columns ( )
     {
@@ -89,6 +93,16 @@ class SkinnyRow
         return $data;
     }
 
+    function get_raw_columns ( )
+    {
+        $data = array( );
+
+        foreach ($this->select_columns as $col) {
+            $data[$col] = $this->get_raw_column($col);
+        }
+
+        return $data;
+    }
 
     function set ($args)
     {
