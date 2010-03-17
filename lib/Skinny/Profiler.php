@@ -41,7 +41,8 @@ class SkinnyProfiler
             print '[DEBUG] '.$log."\n";
         }
         if (Skinny::WRITE_LOG & $this->mode) {
-            $date = date('[Y-m-d H:i:s] ');
+            $pid  = getmypid( );
+            $date = date("[Y-m-d H:i:s|$pid] ");
 
             error_log($date.$log."\n", 3, $this->logfile);
         }

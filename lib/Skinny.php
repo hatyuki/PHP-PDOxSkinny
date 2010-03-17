@@ -104,6 +104,12 @@ class PDOxSkinny
     }
 
 
+    function __destruct ( )
+    {
+        $this->profiler('DISCONNECT TO: '.$this->dsn);
+    }
+
+
     /* ---------------------------------------------------------------
      *  Reader
      */
