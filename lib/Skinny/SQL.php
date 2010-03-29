@@ -324,6 +324,10 @@ class SkinnySQL
 
     function offset ($offset)
     {
+        if ($offset < 0) {
+            trigger_error('OFFSET must not be negative', E_USER_ERROR);
+        }
+
         $this->offset = $offset;
         return $this;
     }
