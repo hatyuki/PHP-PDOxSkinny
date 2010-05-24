@@ -423,7 +423,7 @@ class PDOxSkinny
             $rs->order($orders);
         }
 
-        if ( isset($opt['having']) ) { 
+        if ( isset($opt['having']) ) {
             $terms = $opt['having'];
 
             foreach ($terms as $col => $val) {

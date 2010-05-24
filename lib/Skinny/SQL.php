@@ -545,7 +545,7 @@ class SkinnySQL
             $c = empty($val['column'])
                ? $col
                : $val['column'];
-        
+
             list($op, $v) = each($val);
 
             if ( ($op == 'in' || $op == 'not in') && $this->ref($v) == 'ARRAY') {
