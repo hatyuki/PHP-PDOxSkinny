@@ -33,6 +33,7 @@ class PDOxSkinny
     public    $error_msg                        = null;      // -- Str
     public    $in_storage                       = false;     // -- Bool
     public    $raise_error                      = false;     // -- Bool
+    public    $persistent                       = false;     // -- Bool
     protected $dsn                              = null;      // -- Str
     protected $username                         = null;      // -- Str
     protected $password                         = null;      // -- Str
@@ -76,6 +77,10 @@ class PDOxSkinny
                                ? $args['raise_error']
                                : false;
 
+            $this->persistent = isset($args['persistent'])
+                              ? $args['persistent']
+                              : false;
+
             if ( isset($args['profile']) ) {
                 $this->profile = $args['profile'];
             }
@@ -107,6 +112,7 @@ class PDOxSkinny
     function __destruct ( )
     {
         $this->profiler('DISCONNECT TO: '.$this->dsn);
+        $this->dbh = null;
     }
 
 
@@ -260,8 +266,10 @@ class PDOxSkinny
                 $this->is_error  = false;
                 $this->error_msg = null;
 
+                $attr[PDO::ATTR_PERSISTENT] = $this->persistent;
+
                 $this->dbd = new $dbd( );
-                $this->dbh = new PDO($this->dsn, $this->username, $this->password);
+                $this->dbh = new PDO($this->dsn, $this->username, $this->password, $attr);
                 $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
                 $auto_commit = isset($this->connect_options['AutoCommit'])
