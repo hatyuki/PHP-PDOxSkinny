@@ -151,7 +151,7 @@ class SkinnyRow
 
         $this->set($args);
 
-        return $result;
+        return $result->first( );
     }
 
 
