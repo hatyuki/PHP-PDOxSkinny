@@ -5,10 +5,10 @@ require_once 'Skinny/Row.php';
 // SkinnyIterator based on DBIx::Skinny 0.04
 class SkinnyIterator
 {
-    protected $skinny         = null;      // -- Object
+    public    $opt_table_info = null;      // -- Str
+    public    $skinny         = null;      // -- Object
     protected $sth            = null;      // -- Object
     protected $data           = null;      // -- Array
-    protected $opt_table_info = null;      // -- Str
     protected $row_class      = null;      // -- Str
     protected $base_row_class = null;
     protected $position       = 0;         // -- Int
@@ -48,11 +48,11 @@ class SkinnyIterator
             $row = array_shift($this->data);
 
             if ( !$row ) {
-                return ;
+                return null;
             }
         }
         else {
-            return ;
+            return null;
         }
 
         if ( is_a($row, 'SkinnyRow') ) {

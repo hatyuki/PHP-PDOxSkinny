@@ -6,7 +6,7 @@ require_once 'Skinny/Transaction.php';
 
 class Skinny
 {
-    const VERSION = 0.07;
+    const VERSION = 0.071;
 
     // for SkinnyProfiler
     const TRACE_LOG = 1;
@@ -43,7 +43,7 @@ class PDOxSkinny
     protected $profile                          = false;     // -- Bool
     protected $logfile                          = null;      // -- Str
     protected $active_transaction               = 0;         // -- Int
-    protected $rollbacked_in_nested_transaction = false;     // -- Int
+    protected $rollbacked_in_nested_transaction = false;     // -- Bool
     protected $mixins                           = array( );  // -- Hash
 
 
@@ -112,7 +112,6 @@ class PDOxSkinny
     function __destruct ( )
     {
         $this->profiler('DISCONNECT TO: '.$this->dsn);
-        $this->dbh = null;
     }
 
 
@@ -379,7 +378,15 @@ class PDOxSkinny
     }
 
 
-    function search ($table=null, $where=array( ), $opt=array( ))
+    function search ($table, $where=array( ), $opt=array( ))
+    {
+        $rs = $this->search_rs($table, $where, $opt);
+
+        return $rs->retrieve( );
+    }
+
+
+    function search_rs ($table, $where=array( ), $opt=array( ))
     {
         if ( isset($opt['select']) ) {
             $cols = $opt['select'];
@@ -439,7 +446,7 @@ class PDOxSkinny
             }
         }
 
-        return $rs->retrieve( );
+        return $rs;
     }
 
 

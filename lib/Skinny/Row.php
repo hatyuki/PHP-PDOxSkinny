@@ -4,12 +4,12 @@
 // SkinnyRow based on DBIx::Skinny 0.04
 class SkinnyRow
 {
+    public    $opt_table_info    = null;      // -- Str
+    public    $skinny            = null;      // -- Object
     protected $select_columns    = null;      // -- Array
     protected $row_data          = array( );  // -- Hash
     protected $get_column_cached = array( );  // -- Hash
-    protected $dirty_columns     = false;     // -- Bool
-    protected $opt_table_info    = null;      // -- Str
-    protected $skinny            = null;      // -- Object
+    protected $dirty_columns     = array( );  // -- Hash
 
 
     function __construct ($args)
@@ -122,7 +122,9 @@ class SkinnyRow
         $rows = array( );
 
         foreach ($this->dirty_columns as $col => $dirty) {
-            $rows[$col] = $this->get_column($col);
+            if ($dirty) {
+                $rows[$col] = $this->get_column($col);
+            }
         }
 
         return $rows;
