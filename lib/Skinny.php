@@ -1,4 +1,5 @@
 <?php
+require_once 'Skinny/Util.php';
 require_once 'Skinny/Profiler.php';
 require_once 'Skinny/Iterator.php';
 require_once 'Skinny/Transaction.php';
@@ -417,14 +418,14 @@ class PDOxSkinny
         if ( isset($opt['order_by']) ) {
             $terms = $opt['order_by'];
 
-            if ($this->ref($terms) != 'ARRAY') {
+            if (SkinnyUtil::ref($terms) != 'ARRAY') {
                 $terms = array($terms);
             }
 
             $orders = array( );
 
             foreach ($terms as $term) {
-                if ($this->ref($term) == 'HASH') {
+                if (SkinnyUtil::ref($term) == 'HASH') {
                     list($col, $case) = each($term);
                 }
                 else {
@@ -621,10 +622,10 @@ class PDOxSkinny
         foreach ($values as $col => $val) {
             $quoted_col = $this->quote($col, $quote, $name_sep);
 
-            if ( $this->ref($val) == 'ARRAY' && isset($val['inject']) ) {
+            if ( SkinnyUtil::ref($val) == 'ARRAY' && isset($val['inject']) ) {
                 $set[ ] = "$quoted_col $val";
             }
-            else if ($this->ref($val) == 'SCALAR') {
+            else if (SkinnyUtil::ref($val) == 'SCALAR') {
                 $set[ ]  = "$quoted_col = ?";
 
                 if ( is_bool($val) ) {
@@ -784,8 +785,8 @@ class PDOxSkinny
     {
         $row_class = get_class($this).'Row';
 
-        if ( class_exists($row_class.$this->camelize($table)) ) {
-            return $row_class.$this->camelize($table);
+        if ( class_exists($row_class.SkinnyUtil::camelize($table)) ) {
+            return $row_class.SkinnyUtil::camelize($table);
         }
         else if ( class_exists($row_class) ) {
             return $row_class;
@@ -793,12 +794,6 @@ class PDOxSkinny
         else {
             return 'SkinnyRow';
         }
-    }
-
-
-    protected function camelize ($str)
-    {
-        return str_replace(' ', '', ucwords(str_replace('_', ' ', $str)));
     }
 
 

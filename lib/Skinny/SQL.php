@@ -1,4 +1,5 @@
 <?php
+require_once 'Skinny/Util.php';
 
 
 // SkinnySQL based on DBIx::Skinny 0.04
@@ -70,7 +71,7 @@ class SkinnySQL
 
     function add_select ($terms, $col=null)
     {
-        switch ( $this->ref($terms) ) {
+        switch ( SkinnyUtil::ref($terms) ) {
         case 'HASH':
             foreach ($terms as $term => $col) {
                 if ( is_array($this->select) ) {
@@ -148,7 +149,7 @@ class SkinnySQL
 
     function from ($args)
     {
-        switch ( $this->ref($args) ) {
+        switch ( SkinnyUtil::ref($args) ) {
         case 'ARRAY':
             $this->from = $args;
             break;
@@ -246,13 +247,13 @@ class SkinnySQL
         if ( !empty($this->joins) ) {
             $initial_table_written = 0;
 
-            if ($this->ref($this->joins) == 'HASH') {
+            if (SkinnyUtil::ref($this->joins) == 'HASH') {
                 $this->joins = array($this->joins);
             }
 
             foreach ($this->joins as $j) {
                 $table = $j['table'];
-                $joins = $this->ref($j['joins']) == 'HASH'
+                $joins = SkinnyUtil::ref($j['joins']) == 'HASH'
                        ? array($j['joins'])
                        : $j['joins'];
 
@@ -263,7 +264,7 @@ class SkinnySQL
                 }
 
                 foreach ($joins as $join) {
-                    if ($this->ref($join['condition']) == 'ARRAY') {
+                    if (SkinnyUtil::ref($join['condition']) == 'ARRAY') {
                         $mode = ' USING ';
                         $join['condition'] = join(', ', $join['condition']);
                     }
@@ -379,7 +380,7 @@ class SkinnySQL
             return '';
         }
 
-        if ( $this->ref($attribute) == 'HASH') {
+        if ( SkinnyUtil::ref($attribute) == 'HASH') {
             $attribute = array($attribute);
         }
 
@@ -413,7 +414,7 @@ class SkinnySQL
             return $this;
         }
 
-        if ($this->ref($args) == 'HASH') {
+        if (SkinnyUtil::ref($args) == 'HASH') {
             foreach ($args as $col => $val) {
                 list($term, $bind, $tcol) = $this->mk_term($col, $val);
 
@@ -473,7 +474,7 @@ class SkinnySQL
               ? $this->index_hint[$tbl_name]
               : null;
 
-        if ( !($hint && $this->ref($hint) == 'HASH') ) {
+        if ( !($hint && SkinnyUtil::ref($hint) == 'HASH') ) {
             return $tbl_name;
         }
 
@@ -514,8 +515,8 @@ class SkinnySQL
         $term = '';
         $bind = array( );
 
-        if ($this->ref($val) == 'ARRAY') {
-            if ($this->ref($val[0]) !== 'SCALAR' || $val[0] === '-and') {
+        if (SkinnyUtil::ref($val) == 'ARRAY') {
+            if (SkinnyUtil::ref($val[0]) !== 'SCALAR' || $val[0] === '-and') {
                 $logic  = 'OR';
                 $values = $val;
 
@@ -541,20 +542,20 @@ class SkinnySQL
                 $bind = $val;
             }
         }
-        else if ($this->ref($val) == 'HASH') {
+        else if (SkinnyUtil::ref($val) == 'HASH') {
             $c = empty($val['column'])
                ? $col
                : $val['column'];
 
             list($op, $v) = each($val);
 
-            if ( ($op == 'in' || $op == 'not in') && $this->ref($v) == 'ARRAY') {
+            if ( ($op == 'in' || $op == 'not in') && SkinnyUtil::ref($v) == 'ARRAY') {
                 $op = strtoupper($op);
 
                 $term = "$c $op (".join(', ', array_fill(0, sizeof($v), '?')).')';
                 $bind = $v;
             }
-            else if ( ($op == 'between' || $op == 'not between') && $this->ref($v) == 'ARRAY') {
+            else if ( ($op == 'between' || $op == 'not between') && SkinnyUtil::ref($v) == 'ARRAY') {
                 $op = strtoupper($op);
 
                 $term = "$c $op ? AND ?";
@@ -563,7 +564,7 @@ class SkinnySQL
             else if ($op == 'inject') {
                 $term = $col.' '.$val[$op];
             }
-            else if ( ($c == 'or' || $c == 'and') && $this->ref($val) == 'HASH') {
+            else if ( ($c == 'or' || $c == 'and') && SkinnyUtil::ref($val) == 'HASH') {
                 $logic = strtoupper($c);
                 $terms = array( );
 
@@ -606,7 +607,7 @@ class SkinnySQL
         $bind  = array( );
 
         foreach ($terms_list as $t) {
-            if ($this->ref($t) == 'SCALAR') {
+            if (SkinnyUtil::ref($t) == 'SCALAR') {
                 if ( preg_match('-?/OR|AND|OR_NOT|AND_NOT)$/', strtoupper($t), $m) ) {
                     $logic = $m[1];
                 }
@@ -618,7 +619,7 @@ class SkinnySQL
 
             $out1 = '';
 
-            if ($this->ref($t) == 'HASH') {
+            if (SkinnyUtil::ref($t) == 'HASH') {
                 $out2 = array( );
 
                 foreach (array_keys($t) as $t2) {
@@ -631,7 +632,7 @@ class SkinnySQL
 
                 $out1 .= '('.join(' AND ', $out2).')';
             }
-            else if ($this->ref($t) == 'ARRAY') {
+            else if (SkinnyUtil::ref($t) == 'ARRAY') {
                 list($where, $bind2) = $this->parse_array_terms($t);
                 $bind[ ] =  $bind2;
                 $out1 = '('.$where.')';
@@ -655,27 +656,5 @@ class SkinnySQL
         return $this->skinny->search_by_sql(
             $this->as_sql( ), $this->bind, $table
         );
-    }
-
-
-    protected function ref ($val)
-    {
-        if ( !is_array($val) ) {
-            return 'SCALAR';
-        }
-        else if ( is_array($val) ) {
-            reset($val);
-
-            foreach ($val as $k => $v) {
-                if ( !is_integer($k) ) {
-                    reset($val);
-                    return 'HASH';
-                }
-            }
-
-            return 'ARRAY';
-        }
-
-        return '';
     }
 }
