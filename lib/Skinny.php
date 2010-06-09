@@ -875,28 +875,6 @@ BIND    : %s
     }
 
 
-    protected function ref ($val)
-    {
-        if ( !is_array($val) ) {
-            return 'SCALAR';
-        }
-        else if ( is_array($val) ) {
-            reset($val);
-
-            foreach ($val as $k => $v) {
-                if ( !is_integer($k) ) {
-                    reset($val);
-                    return 'HASH';
-                }
-            }
-
-            return 'ARRAY';
-        }
-
-        return '';
-    }
-
-
     /* ---------------------------------------------------------------
      *  Provides Mixin Function
      */
