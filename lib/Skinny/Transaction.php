@@ -6,14 +6,16 @@ class SkinnyTransaction
 {
     protected $status = false;  // -- Bool
     protected $skinny = null;   // -- Object
+    protected $name   = null;   // -- String
 
 
-    function __construct ($skinny)
+    function __construct ($skinny, $name='')
     {
         $this->status =  false;
         $this->skinny = $skinny;
+        $this->name   = $name;
 
-        $skinny->txn_begin( );
+        $skinny->txn_begin($name);
     }
 
 
@@ -37,7 +39,7 @@ class SkinnyTransaction
             return false;
         }
 
-        $this->skinny->txn_rollback( );
+        $this->skinny->txn_rollback($this->name);
         $this->status = true;
 
         return true;
@@ -50,7 +52,7 @@ class SkinnyTransaction
             return false;
         }
 
-        $this->skinny->txn_commit( );
+        $this->skinny->txn_commit($this->name);
         $this->status = true;
 
         return true;
@@ -59,8 +61,12 @@ class SkinnyTransaction
 
     function __destruct ( )
     {
+        if ($this->status) {
+            return null;
+        }
+
         try {
-            $this->skinny->txn_rollback( );
+            $this->skinny->txn_rollback($this->name);
         }
         catch (Exception $e) {
             trigger_error('Rollback failed: '.$e->getMessage( ), E_USER_ERROR);

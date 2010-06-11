@@ -148,22 +148,24 @@ class PDOxSkinny
     /* ---------------------------------------------------------------
      *  Transaction Support
      */
-    function txn_scope ( )
+    function txn_scope ($name='')
     {
-        return new SkinnyTransaction($this);
+        if ( !$name ) {
+            $name = sha1(mt_rand( ));
+        }
+
+        return new SkinnyTransaction($this, $name);
     }
 
 
-    function txn_begin ( )
+    function txn_begin ($name='')
     {
         $count = ++$this->active_transaction;
+        $this->profiler("BEGIN TRANSACTION [$name : $count]");
 
         if ($count > 1) {
-            $this->profiler("BEGIN TRANSACTION [Nested Transaction: $count]");
             return null;
         }
-
-        $this->profiler('BEGIN TRANSACTION');
 
         if ( $this->dbh->beginTransaction( ) ) {
             return true;
@@ -173,15 +175,16 @@ class PDOxSkinny
     }
 
 
-    function txn_rollback ( )
+    function txn_rollback ($name='')
     {
         if ( !$this->active_transaction ) {
+            $this->txn_end( );
             return false;
         }
 
         if ($this->active_transaction == 1) {
-            $this->profiler('ROLLBACK TRANSACTION');
-
+            $count = $this->active_transaction;
+            $this->profiler("ROLLBACK TRANSACTION [$name : $count]");
             if ( $this->dbh->rollBack( ) ) {
                 return $this->txn_end( );
             };
@@ -191,7 +194,7 @@ class PDOxSkinny
         else if ($this->active_transaction > 1) {
             $count = $this->active_transaction--;
             $this->rollbacked_in_nested_transaction = true;
-            $this->profiler("ROLLBACK TRANSACTION [Nested Transaction: $count]");
+            $this->profiler("ROLLBACK TRANSACTION [$name : $count]");
 
             return true;
         }
@@ -200,25 +203,29 @@ class PDOxSkinny
     }
 
 
-    function txn_commit ( )
+    function txn_commit ($name='')
     {
         if ( !$this->active_transaction ) {
+            $this->txn_end( );
             return false;
         }
+
+        $count = $this->active_transaction;
 
         if ($this->rollbacked_in_nested_transaction) {
             trigger_error(
                 'tried to commit but already rollbacked in nested transaction',
                 E_USER_ERROR
             );
+            return false;
         }
         else if ($this->active_transaction > 1) {
-            $count = $this->active_transaction--;
-            $this->profiler("COMMIT TRANSACTION [Nested Transaction: $count]");
+            $this->active_transaction--;
+            $this->profiler("COMMIT TRANSACTION [$name : $count]");
             return true;
         }
 
-        $this->profiler('COMMIT TRANSACTION');
+        $this->profiler("COMMIT TRANSACTION [$name : $count]");
         $this->dbh->commit( );
 
         return $this->txn_end( );
