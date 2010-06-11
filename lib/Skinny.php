@@ -156,11 +156,20 @@ class PDOxSkinny
 
     function txn_begin ( )
     {
-        if (++$this->active_transaction == 1) {
-            $this->profiler('BEGIN TRANSACTION');
+        $count = ++$this->active_transaction;
+
+        if ($count > 1) {
+            $this->profiler("BEGIN TRANSACTION [Nested Transaction: $count]");
+            return null;
         }
 
-        return $this->dbh->beginTransaction( );
+        $this->profiler('BEGIN TRANSACTION');
+
+        if ( $this->dbh->beginTransaction( ) ) {
+            return true;
+        }
+
+        trigger_error('failed to begin transaction', E_USER_ERROR);
     }
 
 
@@ -172,12 +181,18 @@ class PDOxSkinny
 
         if ($this->active_transaction == 1) {
             $this->profiler('ROLLBACK TRANSACTION');
-            $this->dbh->rollBack( );
-            return $this->txn_end( );
+
+            if ( $this->dbh->rollBack( ) ) {
+                return $this->txn_end( );
+            };
+
+            trigger_error('failed to rollback transaction', E_USER_ERROR);
         }
         else if ($this->active_transaction > 1) {
-            $this->active_transaction--;
+            $count = $this->active_transaction--;
             $this->rollbacked_in_nested_transaction = true;
+            $this->profiler("ROLLBACK TRANSACTION [Nested Transaction: $count]");
+
             return true;
         }
 
@@ -198,7 +213,8 @@ class PDOxSkinny
             );
         }
         else if ($this->active_transaction > 1) {
-            $this->active_transaction--;
+            $count = $this->active_transaction--;
+            $this->profiler("COMMIT TRANSACTION [Nested Transaction: $count]");
             return true;
         }
 
