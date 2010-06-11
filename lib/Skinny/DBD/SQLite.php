@@ -1,4 +1,4 @@
-<?php  // vim: ts=4 sts=4 sw=4
+<?php
 require_once 'Skinny/SQL.php';
 
 
