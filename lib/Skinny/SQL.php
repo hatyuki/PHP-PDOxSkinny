@@ -155,6 +155,7 @@ class SkinnySQL
             break;
 
         case 'HASH':
+            $terms = array( );
             foreach ($args as $term => $name) {
                 $terms[ ] = $term.' '.$name;
             }
