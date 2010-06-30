@@ -12,7 +12,7 @@ class SkinnyProfiler
 
     function __construct ($mode=0, $logfile=null)
     {
-        $this->mode    = intval($mode);
+        $this->mode    = $this->mode2number($mode);
         $this->logfile = $logfile;
         $this->reset( );
     }
@@ -40,7 +40,7 @@ class SkinnyProfiler
         if (Skinny::PRINT_LOG & $this->mode) {
             print '[DEBUG] '.$log."\n";
         }
-        if (Skinny::WRITE_LOG & $this->mode) {
+        if (Skinny::WRITE_LOG & $this->mode && $this->logfile) {
             $pid  = getmypid( );
             $date = date("[Y-m-d H:i:s|$pid] ");
 
@@ -67,5 +67,34 @@ class SkinnyProfiler
         return is_integer($key)
              ? $val
              : preg_replace('/^:/', '', $key)." => $val";
+    }
+
+
+    protected function mode2number ($str)
+    {
+        if ( is_numeric($str) ) {
+            return intval($str);
+        }
+
+        $mode = explode(',', $str);
+        $retval = 0;
+
+        foreach ($mode as $m) {
+            switch ($m) {
+            case preg_match('/TRACE_LOG/i', $m) > 0:
+                $retval += Skinny::TRACE_LOG;
+                break;
+
+            case preg_match('/PRINT_LOG/i', $m) > 0:
+                $retval += Skinny::PRINT_LOG;
+                break;
+
+            case preg_match('/WRITE_LOG/i', $m) > 0:
+                $retval += Skinny::WRITE_LOG;
+                break;
+            }
+        }
+
+        return $retval;
     }
 }
