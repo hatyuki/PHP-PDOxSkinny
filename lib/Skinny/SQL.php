@@ -21,6 +21,7 @@ class SkinnySQL
     protected $limit              = null;      // -- Int
     protected $offset             = null;      // -- Int
     protected $comment            = null;      // -- Str
+    protected $for_update         = false;     // -- Bool
     protected $skinny             = null;      // -- Object
 
 
@@ -219,6 +220,13 @@ class SkinnySQL
     }
 
 
+    function for_update ($update)
+    {
+        $this->for_update = $update;
+        return $this;
+    }
+
+
     function as_sql ( )
     {
         $sql = '';
@@ -312,6 +320,8 @@ class SkinnySQL
                 $sql .= '-- '.$m[1];
             }
         }
+
+        $sql .= $this->as_for_update( );
 
         return $sql;
     }
@@ -508,6 +518,12 @@ class SkinnySQL
     protected function set_attribute ($args)
     {
         return $args['column'].(isset($args['desc']) ? (' '.$args['desc']) : '');
+    }
+
+
+    protected function as_for_update ( )
+    {
+        return $this->for_update ? 'FOR UPDATE' : '';
     }
 
 

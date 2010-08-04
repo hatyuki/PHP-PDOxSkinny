@@ -587,10 +587,8 @@ class PDOxSkinny
 
         if ($this->is_error) { return; }
 
-        $pk = $schema->schema_info[$table]['pk'];
-        $id = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
-
-
+        $pk  = $schema->schema_info[$table]['pk'];
+        $id  = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
         $row = $this->single($table, array(
             $schema->schema_info[$table]['pk'] => $id
         ) );
