@@ -101,4 +101,22 @@ class TestIterator extends PHPUnit_Framework_TestCase
 
         $this->assertNull($itr->next( ));
     }
+
+    function testCurrent ( )
+    {
+        $itr = $this->class->search('mock_basic');
+
+        $row1 = $itr->next( );
+        $row2 = $itr->current( );
+        $this->assertTrue( is_a($row1, 'SkinnyRow') );
+        $this->assertTrue( is_a($row2, 'SkinnyRow') );
+        $this->assertEquals($row1->id, 1);
+        $this->assertEquals($row2->name, 'perl');
+        $this->assertEquals($row1, $row2);
+
+        $this->assertEquals($itr->next( ), $itr->current( ));
+        $this->assertEquals($itr->next( ), $itr->current( ));
+        $this->assertEquals($itr->back( ), $itr->current( ));
+        $this->assertEquals($itr->next( ), $itr->current( ));
+    }
 }
