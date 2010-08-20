@@ -100,6 +100,11 @@ class SkinnyIterator
     }
 
 
+    function current ( )
+    {
+        return $this->iterator($this->position);
+    }
+
     function back ( )
     {
         return $this->iterator($this->position - 1);
