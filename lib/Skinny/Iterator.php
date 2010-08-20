@@ -47,7 +47,7 @@ class SkinnyIterator
             }
         }
         else if ($this->data && is_array($this->data) ) {
-            $row = $this->data[$position];
+            $row = array_shift($this->data);
 
             if ( !$row ) {
                 return null;
