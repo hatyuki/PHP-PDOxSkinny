@@ -303,7 +303,7 @@ class PDOxSkinny
                                ? $this->connect_options['on_connect_do']
                                : array($this->connect_options['on_connect_do']);
 
-                if ($this->dbd_type($this->dsn) != 'PostgreSQL') {
+                if ($this->dbd_type($this->dsn) == 'MySQL') {
                     $this->dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
                 }
 
@@ -760,7 +760,7 @@ class PDOxSkinny
 
     protected function dbd_type ($dsn)
     {
-        if ( !preg_match('/^(.+):/', $dsn, $m) ) {
+        if ( !preg_match('/^(.+?):/', $dsn, $m) ) {
             trigger_error("unknown db type: $dsn", E_USER_ERROR);
         }
 
@@ -857,9 +857,7 @@ class PDOxSkinny
         $this->profiler($stmt, $bind);
 
         try {
-            $sth = $this->dbh->prepare(
-                $stmt, array(PDO::CURSOR_SCROLL => PDO::ATTR_CURSOR)
-            );
+            $sth = $this->dbh->prepare($stmt);
             $sth->execute($bind);
         }
         catch (Exception $e) {

@@ -110,6 +110,39 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
         $this->assertEquals($res."\n", $obj->as_sql( ));
     }
 
+    function testJoinUsing ( )
+    {
+        $obj =& $this->class;
+
+        $join = array(
+            'foo' => array(
+                array(
+                    'type'      => 'inner',
+                    'table'     => 'baz b1',
+                    'condition' => array('id', 'name'),
+                ),
+            ),
+        );
+        $obj->add_join($join);
+
+        $join = array(
+            'foo' => array(
+                array(
+                    'type'      => 'left',
+                    'table'     => 'baz b2',
+                    'condition' => 'foo.baz_id = b2.baz_id AND b2.quux_id = 2',
+                ),
+             ),
+        );
+        $obj->add_join($join);
+
+        $res = ''
+             .'FROM foo '
+             .'INNER JOIN baz b1 USING (id, name) '
+             .'LEFT JOIN baz b2 ON (foo.baz_id = b2.baz_id AND b2.quux_id = 2)';
+        $this->assertEquals($res."\n", $obj->as_sql( ));
+    }
+
     function testGroupBy ( )
     {
         $obj =& $this->class;

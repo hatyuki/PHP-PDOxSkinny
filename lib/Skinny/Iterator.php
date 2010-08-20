@@ -10,8 +10,8 @@ class SkinnyIterator
     protected $sth            = null;      // -- Object
     protected $data           = null;      // -- Array
     protected $row_class      = null;      // -- Str
-    protected $base_row_class = null;
     protected $position       = 0;         // -- Int
+    protected $base_row_class = null;      // -- Str
     protected $rows_cache     = array( );  // -- Array
     protected $cache          = true;      // -- Bool
 
@@ -26,17 +26,19 @@ class SkinnyIterator
     }
 
 
-    function iterator ( )
+    protected function iterator ($position)
     {
-        $position = $this->position + 1;
+        if ($position <= 0) {
+            return null;
+        }
 
-        if ( $this->cache && array_key_exists($position, $this->rows_cache) ) {
+        if ( $this->cache && isset($this->rows_cache[$position]) ) {
             $this->position = $position;
             return $this->rows_cache[$position];
         }
 
         if ($this->sth) {
-            $row =& $this->sth->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_ABS, $position);
+            $row =& $this->sth->fetch(PDO::FETCH_ASSOC);
 
             if ( !$row ) {
                 $this->skinny->close_sth($this->sth);
@@ -45,7 +47,7 @@ class SkinnyIterator
             }
         }
         else if ($this->data && is_array($this->data) ) {
-            $row = array_shift($this->data);
+            $row = $this->data[$position];
 
             if ( !$row ) {
                 return null;
@@ -77,6 +79,7 @@ class SkinnyIterator
         if ($this->cache) {
             $this->rows_cache[$position] = $obj;
         }
+
         $this->position = $position;
 
         return $obj;
@@ -93,7 +96,13 @@ class SkinnyIterator
 
     function next ( )
     {
-        return $this->iterator( );
+        return $this->iterator($this->position + 1);
+    }
+
+
+    function back ( )
+    {
+        return $this->iterator($this->position - 1);
     }
 
 
@@ -140,6 +149,11 @@ class SkinnyIterator
         return sizeof($rows);
     }
 
+
+    function position ( )
+    {
+        return $this->position;
+    }
 
     function no_cache ( )
     {
