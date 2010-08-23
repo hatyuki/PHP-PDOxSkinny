@@ -8,11 +8,14 @@ require_once 'Mock/Basic/Schema.php';
 
 class MockBasic extends PDOxSkinny
 {
-    function __construct ( )
+    function __construct ($args=array( ))
     {
-        parent::__construct( array(
-            'dsn' => 'sqlite::memory:',
-            'raise_error' => true,
+        parent::__construct( array_merge(
+            array(
+                'dsn' => 'sqlite::memory:',
+                'raise_error' => true,
+            ),
+            $args
         ) );
     }
 
