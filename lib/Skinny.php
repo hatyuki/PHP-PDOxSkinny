@@ -624,7 +624,7 @@ class PDOxSkinny
     }
 
 
-    function update ($table, $args, $where)
+    function update ($table, $args, $where=array( ))
     {
         $schema = $this->schema;
         $this->call_schema_trigger('pre_update', $schema, $table, $args);
@@ -672,16 +672,15 @@ class PDOxSkinny
         $sql = "UPDATE $table SET ".join(', ', $set).' '.$stmt->as_sql_where( );
 
         $sth = $this->execute($sql, $bind);
-        $this->close_sth($sth);
 
-        if ($this->is_error) { return; }
-
-        $itr = $this->search($table, $where);
-        while ( $row = $itr->next( ) ) {
-            $this->call_schema_trigger('post_update', $schema, $table, $row);
+        if ($this->is_error) {
+            $this->close_sth($sth);
         }
 
-        return $itr->reset( );
+        $ret = $sth->rowCount( );
+        $this->close_sth($sth);
+
+        return $ret;
     }
 
 

@@ -70,13 +70,8 @@ class TestSkinnyUpdate extends PHPUnit_Framework_TestCase
         $this->assertEquals($new_row->name, '2');
     }
 
-    // SKIP: update( ) の実装が違う (本家にあわせたい)
     function testUpdateRowCount ( )
     {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
-
         $this->class->insert('mock_basic', array(
             'id'   => 2,
             'name' => 'c++',
