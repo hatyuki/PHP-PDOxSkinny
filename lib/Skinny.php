@@ -754,7 +754,6 @@ class PDOxSkinny
         }
         else if ($itr->count( ) == 1) {
             $this->in_storage = true;
-            $args = array_merge($cond, $args);
             $row  = $itr->first( );
             $row->update($args);
         }
