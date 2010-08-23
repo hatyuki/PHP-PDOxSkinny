@@ -1,0 +1,30 @@
+<?php
+require_once 'PHPUnit/Framework/TestSuite.php';
+
+class TestSkinnySuite
+{
+    public static function suite ( )
+    {
+        $suite = new PHPUnit_Framework_TestSuite( );
+
+        include_once '002_new.php';
+        $suite->addTestSuite('TestSkinnyNew');
+
+        include_once '101_insert.php';
+        $suite->addTestSuite('TestSkinnyInsert');
+
+        include_once '102_update.php';
+        $suite->addTestSuite('TestSkinnyUpdate');
+
+        include_once '200_sql.php';
+        $suite->addTestSuite('TestSkinnySQL');
+
+        include_once '202_profiler.php';
+        $suite->addTestSuite('TestSkinnyProfiler');
+
+        include_once '213_iterator.php';
+        $suite->addTestSuite('TestSkinnyIterator');
+
+        return $suite;
+    }
+}

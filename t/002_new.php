@@ -1,7 +1,5 @@
 <?php
-require_once 'PHPUnit/Framework.php';
-
-set_include_path('./t');
+set_include_path('./lib:./t');
 require_once 'Mock/Basic.php';
 
 
@@ -80,47 +78,56 @@ class TestSkinnyNew extends PHPUnit_Framework_TestCase
         $this->assertEquals($model->count('mock_basic', 'id'), 1);
     }
 
-    // SKIP
-    //function testDoNew ( )
-    //{
-        //$model = new MockBasic( );
+    // SKIP: 未実装
+    function testDoNew ( )
+    {
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
 
-        //$itr = $model->search('mock_basic');
-        //$this->assertTrue( is_a($itr, 'SkinnyIterator') );
+        $model = new MockBasic( );
 
-        //$row = $itr->first( );
-        //$this->assertTrue( is_a($row, 'SkinnyRow') );
+        $itr = $model->search('mock_basic');
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
 
-        //$this->assertEquals($row->id, 1);
-        //$this->assertEquals($row->name, 'perl');
+        $row = $itr->first( );
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
 
-        //$this->assertEquals($this->class->count('mock_basic', 'id'), 2);
-        //$this->assertEquals($model->count('mock_basic', 'id'), 1);
-    //}
+        $this->assertEquals($row->id, 1);
+        $this->assertEquals($row->name, 'perl');
 
-    //function testDoNewWithPDO ( )
-    //{
-        //$pdo   = new PDO('sqlite::memory:', '', '');
-        //$model = new MockBasic( array(
-            //'pdo' => $pdo,
-        //) );
+        $this->assertEquals($this->class->count('mock_basic', 'id'), 2);
+        $this->assertEquals($model->count('mock_basic', 'id'), 1);
+    }
 
-        //$model->setup_test_db( );
-        //$model->insert('mock_basic', array(
-            //'id'   => 1,
-            //'name' => 'perl',
-        //) );
+    // SKIP: 未実装
+    function testDoNewWithPDO ( )
+    {
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
 
-        //$itr = $model->search('mock_basic');
-        //$this->assertTrue( is_a($itr, 'SkinnyIterator') );
+        $pdo   = new PDO('sqlite::memory:', '', '');
+        $model = new MockBasic( array(
+            'pdo' => $pdo,
+        ) );
 
-        //$row = $itr->first( );
-        //$this->assertTrue( is_a($row, 'SkinnyRow') );
+        $model->setup_test_db( );
+        $model->insert('mock_basic', array(
+            'id'   => 1,
+            'name' => 'perl',
+        ) );
 
-        //$this->assertEquals($row->id, 1);
-        //$this->assertEquals($row->name, 'perl');
+        $itr = $model->search('mock_basic');
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
 
-        //$this->assertEquals($this->class->count('mock_basic', 'id'), 2);
-        //$this->assertEquals($model->count('mock_basic', 'id'), 1);
-    //}
+        $row = $itr->first( );
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
+
+        $this->assertEquals($row->id, 1);
+        $this->assertEquals($row->name, 'perl');
+
+        $this->assertEquals($this->class->count('mock_basic', 'id'), 2);
+        $this->assertEquals($model->count('mock_basic', 'id'), 1);
+    }
 }

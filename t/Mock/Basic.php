@@ -1,8 +1,6 @@
 <?php
-set_include_path('./lib');
+set_include_path('./lib:./t');
 require_once 'Skinny.php';
-
-set_include_path('./t');
 require_once 'Mock/Basic/Schema.php';
 
 

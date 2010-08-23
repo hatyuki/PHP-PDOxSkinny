@@ -1,5 +1,5 @@
 <?php
-set_include_path('./lib');
+set_include_path('./lib:./t');
 require_once 'Skinny/Schema.php';
 
 class MockBasicSchema extends SkinnySchema

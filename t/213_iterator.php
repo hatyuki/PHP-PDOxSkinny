@@ -1,7 +1,5 @@
 <?php
-require_once 'PHPUnit/Framework.php';
-
-set_include_path('./t');
+set_include_path('./lib:./t');
 require_once 'Mock/Basic.php';
 
 class TestSkinnyIterator extends PHPUnit_Framework_TestCase
