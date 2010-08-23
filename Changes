@@ -1,5 +1,10 @@
 Revision history for PHP extension PDOxSkinny
 
+0.0732
+   2010-08-23
+        - MOD: refactoring update / update_by_sql / delete_by_sql methods (incompatible changes)
+        - ADD: add couple of test case (もっと追加したい)
+
 0.0731
    2010-08-20
         - ADD: add new methods on Iterator class -- current( ) / back( )
