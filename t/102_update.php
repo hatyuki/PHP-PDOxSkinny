@@ -25,7 +25,7 @@ class TestSkinnyUpdate extends PHPUnit_Framework_TestCase
         $this->assertEquals($row->name, 'python');
     }
 
-    function testRowObjectUpdate ( )
+    function testUpdateRowObject ( )
     {
         $row = $this->class->single('mock_basic', array('id' => 1));
         $this->assertEquals($row->name, 'perl');
@@ -38,7 +38,7 @@ class TestSkinnyUpdate extends PHPUnit_Framework_TestCase
         $this->assertEquals($row->name, 'php');
     }
 
-    function testDataSetUpdate ( )
+    function testUpdateDataSet ( )
     {
         $row = $this->class->single('mock_basic', array('id' => 1));
         $this->assertEquals($row->name, 'perl');
@@ -55,7 +55,7 @@ class TestSkinnyUpdate extends PHPUnit_Framework_TestCase
         $this->assertEquals($row->name, 'ruby');
     }
 
-    function testInjectUpdate ( )
+    function testUpdateInject ( )
     {
         $row = $this->class->single('mock_basic', array('id' => 1));
         $this->assertEquals($row->name, 'perl');

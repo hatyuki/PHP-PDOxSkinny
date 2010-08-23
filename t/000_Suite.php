@@ -16,6 +16,15 @@ class TestSkinnySuite
         include_once '102_update.php';
         $suite->addTestSuite('TestSkinnyUpdate');
 
+        include_once '103_delete.php';
+        $suite->addTestSuite('TestSkinnyDelete');
+
+        include_once '104_find_or_create.php';
+        $suite->addTestSuite('TestSkinnyFindOrCreate');
+
+        include_once '105_count.php';
+        $suite->addTestSuite('TestSkinnyCount');
+
         include_once '200_sql.php';
         $suite->addTestSuite('TestSkinnySQL');
 
