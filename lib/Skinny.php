@@ -675,6 +675,7 @@ class PDOxSkinny
 
         if ($this->is_error) {
             $this->close_sth($sth);
+            return;
         }
 
         $ret = $sth->rowCount( );
@@ -687,9 +688,16 @@ class PDOxSkinny
     function update_by_sql ($sql, $bind)
     {
         $sth = $this->execute($sql, $bind);
+
+        if ($this->is_error) {
+            $this->close_sth($sth);
+            return;
+        }
+
+        $ret = $sth->rowCount( );
         $this->close_sth($sth);
 
-        return !$this->is_error;
+        return $ret;
     }
 
 
@@ -721,9 +729,16 @@ class PDOxSkinny
     function delete_by_sql ($sql, $bind)
     {
         $sth = $this->execute($sql, $bind);
+
+        if ($this->is_error) {
+            $this->close_sth($sth);
+            return;
+        }
+
+        $ret = $sth->rowCount( );
         $this->close_sth($sth);
 
-        return !$this->is_error;
+        return $ret;
     }
 
 
