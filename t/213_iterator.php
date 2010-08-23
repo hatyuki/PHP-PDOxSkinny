@@ -26,7 +26,7 @@ class TestIterator extends PHPUnit_Framework_TestCase
         ) );
     }
 
-    function testIteratorWithsCcache ( )
+    function testIteratorWithCache ( )
     {
         $itr = $this->class->search('mock_basic');
         $this->assertTrue( is_a($itr, 'SkinnyIterator') );
