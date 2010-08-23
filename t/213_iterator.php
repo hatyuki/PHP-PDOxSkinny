@@ -4,7 +4,7 @@ require_once 'PHPUnit/Framework.php';
 set_include_path('./t');
 require_once 'Mock/Basic.php';
 
-class TestIterator extends PHPUnit_Framework_TestCase
+class TestSkinnyIterator extends PHPUnit_Framework_TestCase
 {
     private $class;
 

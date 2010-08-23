@@ -643,8 +643,8 @@ class PDOxSkinny
         foreach ($values as $col => $val) {
             $quoted_col = $this->quote($col, $quote, $name_sep);
 
-            if ( SkinnyUtil::ref($val) == 'ARRAY' && isset($val['inject']) ) {
-                $set[ ] = "$quoted_col $val";
+            if ( SkinnyUtil::ref($val) == 'HASH' && isset($val['inject']) ) {
+                $set[ ] = "$quoted_col = {$val['inject']}";
             }
             else if (SkinnyUtil::ref($val) == 'SCALAR') {
                 $set[ ]  = "$quoted_col = ?";
