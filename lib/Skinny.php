@@ -867,9 +867,9 @@ class PDOxSkinny
     {
         $this->is_error  = false;
         $this->error_msg = null;
-
         $this->profiler($stmt, $bind);
 
+        $sth = null;
         try {
             $sth = $this->dbh->prepare($stmt);
             $sth->execute($bind);
