@@ -26,13 +26,6 @@ class TestMixinCacheLite extends PHPUnit_Framework_TestCase
             'id'   => 2,
             'name' => 'python',
         ) );
-
-        $cache = new SkinnyMixinCacheLite($this->class, array(
-            'cacheDir' => './t/cache/',
-            'lifeTime' => 3,
-        ) );
-
-        $this->class->mixin($cache);
     }
 
     function tearDown ( )
@@ -58,8 +51,59 @@ class TestMixinCacheLite extends PHPUnit_Framework_TestCase
     }
 
 
+    function testNewUsingObject ( )
+    {
+        $cache = new SkinnyMixinCacheLite($this->class, array(
+            'cacheDir' => './t/cache/',
+            'lifeTime' => 3,
+        ) );
+        $this->class->mixin($cache);
+
+        $itr = $this->class->search_by_sql_with_cache(
+            'SELECT * FROM mock_basic WHERE id = ?', array(1)
+        );
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+        $row = $itr->first( );
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
+        $this->assertEquals($row->id, 1);
+        $this->assertEquals($row->name, 'perl');
+        $this->assertFalse($this->class->cache_hit( ));
+    }
+
+
+    function testNewWithConfig ( )
+    {
+        $cache_config = array(
+            'cacheDir' => './t/cache/',
+            'lifeTime' => 3,
+        );
+        $this->class->mixin( array(
+            'SkinnyMixinCacheLite' => $cache_config,
+        ) );
+
+        $itr = $this->class->search_by_sql_with_cache(
+            'SELECT * FROM mock_basic WHERE id = ?', array(2)
+        );
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+        $row = $itr->first( );
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
+        $this->assertEquals($row->id, 2);
+        $this->assertEquals($row->name, 'python');
+        $this->assertFalse($this->class->cache_hit( ));
+    }
+
+
     function testCacheSearch ( )
     {
+        $cache_config = array(
+            'cacheDir' => './t/cache/',
+            'lifeTime' => 3,
+        );
+        $this->class->mixin( array(
+            'SkinnyMixinCacheLite' => $cache_config,
+        ) );
+
+
         $itr = $this->class->search_by_sql_with_cache(
             'SELECT * FROM mock_basic WHERE id = ?', array(1)
         );
@@ -118,6 +162,15 @@ class TestMixinCacheLite extends PHPUnit_Framework_TestCase
 
     function testCacheTimeout ( )
     {
+        $cache_config = array(
+            'cacheDir' => './t/cache/',
+            'lifeTime' => 3,
+        );
+        $this->class->mixin( array(
+            'SkinnyMixinCacheLite' => $cache_config,
+        ) );
+
+
         $itr = $this->class->search_by_sql_with_cache(
             'SELECT * FROM mock_basic WHERE id = ?', array(1)
         );

@@ -923,13 +923,17 @@ BIND    : %s
 
     function mixin ($include)
     {
-        if ( !is_array($include) ) {
+        if (SkinnyUtil::ref($include) != 'ARRAY') {
             $include = array($include);
         }
 
-        foreach ($include as $obj) {
-            if ( !is_object($obj) ) {
-                $obj = new $obj($this);
+        foreach ($include as $class) {
+            if ( is_array($class) ) {
+                list($class, $args) = each($class);
+                $obj = new $class($this, $args);
+            }
+            else {
+                $obj = is_object($class) ? $class : new $class($this);
             }
 
             $methods = $obj->register_method( );
