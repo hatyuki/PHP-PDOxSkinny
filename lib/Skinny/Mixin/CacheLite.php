@@ -31,13 +31,15 @@ class SkinnyMixinCacheLite extends SkinnyMixin
 
     function search_by_sql_with_cache ($sql, $bind=array( ), $opt_table_info=null)
     {
-        $hash = $this->serialize_statement($sql, $bind);
+        $profiler = $this->skinny->profiler( );
+        $hash     = $this->serialize_statement($sql, $bind);
 
         if ( ($cache = $this->cache->get($hash, $this->group)) ) {
             $cache = unserialize($cache);
             $itr   = $this->skinny->data2itr($cache['table'], $cache['data']);
 
             $this->cache_hit = true;
+            $profiler->record_query("SkinnyMixinCacheLite -- Hit: $hash");
         }
         else {
             $itr   = $this->skinny->search_by_sql($sql, $bind, $opt_table_info);
@@ -49,6 +51,7 @@ class SkinnyMixinCacheLite extends SkinnyMixin
             $this->cache->save(serialize($cache), $hash, $this->group);
 
             $this->cache_hit = false;
+            $profiler->record_query("SkinnyMixinCacheLite -- Miss: $hash");
         }
 
         $itr->reset( );

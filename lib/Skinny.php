@@ -135,7 +135,7 @@ class PDOxSkinny
     /* ---------------------------------------------------------------
      *  Profiler
      */
-    function profiler ($sql, $bind=array( ))
+    function profiler ($sql=null, $bind=array( ))
     {
         if ($this->profile && $sql) {
             $this->profiler->record_query($sql, $bind);

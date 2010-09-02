@@ -121,29 +121,47 @@ class TestMixinCacheLite extends PHPUnit_Framework_TestCase
         $itr = $this->class->search_by_sql_with_cache(
             'SELECT * FROM mock_basic WHERE id = ?', array(1)
         );
-
         $this->assertTrue( is_a($itr, 'SkinnyIterator') );
-
         $row = $itr->first( );
         $this->assertTrue( is_a($row, 'SkinnyRow') );
-
         $this->assertEquals($row->id, 1);
         $this->assertEquals($row->name, 'perl');
         $this->assertFalse($this->class->cache_hit( ));
 
+
         sleep(4);
+
 
         $itr = $this->class->search_by_sql_with_cache(
             'SELECT * FROM mock_basic WHERE id = ?', array(1)
         );
-
         $this->assertTrue( is_a($itr, 'SkinnyIterator') );
-
         $row = $itr->first( );
         $this->assertTrue( is_a($row, 'SkinnyRow') );
-
         $this->assertEquals($row->id, 1);
         $this->assertEquals($row->name, 'perl');
+        $this->assertFalse($this->class->cache_hit( ));
+
+
+        $itr = $this->class->search_by_sql_with_cache(
+            'SELECT * FROM mock_basic WHERE id = ?', array(1)
+        );
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+        $row = $itr->first( );
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
+        $this->assertEquals($row->id, 1);
+        $this->assertEquals($row->name, 'perl');
+        $this->assertTrue($this->class->cache_hit( ));
+
+
+        $itr = $this->class->search_by_sql_with_cache(
+            'SELECT * FROM mock_basic WHERE id = ?', array(2)
+        );
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+        $row = $itr->first( );
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
+        $this->assertEquals($row->id, 2);
+        $this->assertEquals($row->name, 'python');
         $this->assertFalse($this->class->cache_hit( ));
     }
 }
