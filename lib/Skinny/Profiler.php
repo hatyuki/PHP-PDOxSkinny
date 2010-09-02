@@ -26,7 +26,7 @@ class SkinnyProfiler
 
     function record_query ($sql, $bind=array( ))
     {
-        $log  = $this->normalize($sql);
+        $log = $this->normalize($sql);
 
         if ( sizeof($bind) != 0) {
             $log .= ' :binds '.join(', ', array_map(

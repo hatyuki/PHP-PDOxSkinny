@@ -1,5 +1,5 @@
 <?php
-set_include_path('./lib:./t');
+set_include_path(get_include_path( ).':./lib:./t');
 require_once 'Skinny/Profiler.php';
 
 class TestSkinnyProfiler extends PHPUnit_Framework_TestCase

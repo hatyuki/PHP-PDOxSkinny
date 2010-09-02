@@ -34,6 +34,9 @@ class TestSkinnySuite
         include_once '213_iterator.php';
         $suite->addTestSuite('TestSkinnyIterator');
 
+        include_once '900_mixin_cache_lite.php';
+        $suite->addTestSuite('TestMixinCacheLite');
+
         return $suite;
     }
 }

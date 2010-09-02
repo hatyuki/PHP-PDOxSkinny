@@ -1,5 +1,5 @@
 <?php
-set_include_path('./lib:./t');
+set_include_path(get_include_path( ).':./lib:./t');
 require_once 'Mock/Basic.php';
 
 
@@ -108,9 +108,7 @@ class TestSkinnyNew extends PHPUnit_Framework_TestCase
         );
 
         $pdo   = new PDO('sqlite::memory:', '', '');
-        $model = new MockBasic( array(
-            'pdo' => $pdo,
-        ) );
+        $model = new MockBasic( array('pdo' => $pdo) );
 
         $model->setup_test_db( );
         $model->insert('mock_basic', array(
