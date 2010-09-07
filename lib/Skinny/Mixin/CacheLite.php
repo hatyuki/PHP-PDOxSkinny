@@ -5,16 +5,21 @@ require_once 'Skinny/Mixin.php';
 class SkinnyMixinCacheLite extends SkinnyMixin
 {
     protected $cache     = null;
+    protected $hash      = null;
     protected $group     = null;
+    protected $options   = array( );
     protected $cache_hit = false;
 
 
     function __construct ($skinny, $options=array( ))
     {
-        $this->cache = new Cache_Lite($options);
-        $this->group = isset($options['group'])
-                     ? $options['group']
-                     : sha1( mt_rand( ) );
+        $this->options = $options;
+        $this->cache   = new Cache_Lite($options);
+        $this->group   = isset($options['group'])
+                       ? $options['group']
+                       : null;
+
+        $this->cache->clean($this->group, 'old');
 
         parent::__construct($skinny);
     }
@@ -22,8 +27,6 @@ class SkinnyMixinCacheLite extends SkinnyMixin
 
     function register_method ( )
     {
-        $this->cache->clean($this->group, 'old');
-
         return array(
             'search_by_sql_with_cache' => array($this, 'search_by_sql_with_cache'),
             'cache_hit'                => array($this, 'cache_hit'),
@@ -33,15 +36,12 @@ class SkinnyMixinCacheLite extends SkinnyMixin
 
     function search_by_sql_with_cache ($sql, $bind=array( ), $opt_table_info=null)
     {
-        $profiler = $this->skinny->profiler( );
-        $hash     = $this->serialize_statement($sql, $bind);
+        $hash = $this->serialize_statement($sql, $bind);
 
         if ( ($cache = $this->cache->get($hash, $this->group)) ) {
             $cache = unserialize($cache);
             $itr   = $this->skinny->data2itr($cache['table'], $cache['data']);
-
             $this->cache_hit = true;
-            $profiler->record_query("SkinnyMixinCacheLite -- Hit: $hash");
         }
         else {
             $itr   = $this->skinny->search_by_sql($sql, $bind, $opt_table_info);
@@ -51,11 +51,10 @@ class SkinnyMixinCacheLite extends SkinnyMixin
             );
 
             $this->cache->save(serialize($cache), $hash, $this->group);
-
             $this->cache_hit = false;
-            $profiler->record_query("SkinnyMixinCacheLite -- Miss: $hash");
         }
 
+        $this->hash = $hash;
         $itr->reset( );
 
         return $itr;
