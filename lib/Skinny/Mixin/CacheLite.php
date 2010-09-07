@@ -22,6 +22,8 @@ class SkinnyMixinCacheLite extends SkinnyMixin
 
     function register_method ( )
     {
+        $this->cache->clean($this->group, 'old');
+
         return array(
             'search_by_sql_with_cache' => array($this, 'search_by_sql_with_cache'),
             'cache_hit'                => array($this, 'cache_hit'),
