@@ -1,4 +1,5 @@
 <?php
+restore_include_path( );
 set_include_path(get_include_path( ).':./lib:./t');
 require_once 'Mock/Basic.php';
 
