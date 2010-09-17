@@ -23,7 +23,7 @@ class SkinnySchema
     }
 
 
-    function pk ($column)
+    protected function pk ($column)
     {
         $this->schema_info[
             $this->installing_table
@@ -31,7 +31,7 @@ class SkinnySchema
     }
 
 
-    function seq ($column)
+    protected function seq ($column)
     {
         $this->schema_info[
             $this->installing_table
@@ -39,7 +39,7 @@ class SkinnySchema
     }
 
 
-    function columns ($columns)
+    protected function columns ($columns)
     {
         $this->schema_info[
             $this->installing_table
@@ -47,7 +47,7 @@ class SkinnySchema
     }
 
 
-    function trigger ($trigger)
+    protected function trigger ($trigger)
     {
         foreach ($trigger as $trigger_name => $cbs) {
             foreach ($cbs as $callback) {
@@ -105,7 +105,7 @@ class SkinnySchema
     }
 
 
-    function inflate ($callback)
+    protected function inflate ($callback)
     {
         $this->inflate_rules[
             $this->installing_rule
@@ -113,7 +113,7 @@ class SkinnySchema
     }
 
 
-    function deflate ($callback)
+    protected function deflate ($callback)
     {
         $this->inflate_rules[
             $this->installing_rule
