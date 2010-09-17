@@ -17,6 +17,11 @@ class TestSkinnyDelete extends PHPUnit_Framework_TestCase
         ) );
     }
 
+    function tearDown ( )
+    {
+        $this->class = null;
+    }
+
     function testDelete ( )
     {
         $count = $this->class->count('mock_basic', 'id');

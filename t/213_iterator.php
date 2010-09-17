@@ -25,6 +25,11 @@ class TestSkinnyIterator extends PHPUnit_Framework_TestCase
         ) );
     }
 
+    function tearDown ( )
+    {
+        $this->class = null;
+    }
+
     function testIteratorWithCache ( )
     {
         $itr = $this->class->search('mock_basic');

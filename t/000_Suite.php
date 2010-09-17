@@ -31,6 +31,9 @@ class TestSkinnySuite
         include_once '106_inflate.php';
         $suite->addTestSuite('TestSkinnyInflate');
 
+        include_once '108_trigger.php';
+        $suite->addTestSuite('TestSkinnyTrigger');
+
         include_once '200_sql.php';
         $suite->addTestSuite('TestSkinnySQL');
 

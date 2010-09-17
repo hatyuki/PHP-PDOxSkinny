@@ -17,6 +17,11 @@ class TestSkinnyUpdate extends PHPUnit_Framework_TestCase
         ) );
     }
 
+    function tearDown ( )
+    {
+        $this->class = null;
+    }
+
     function testUpdate ( )
     {
         $this->class->update('mock_basic', array('name' => 'python'), array('id' => 1));

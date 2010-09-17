@@ -13,6 +13,11 @@ class TestSkinnyInsert extends PHPUnit_Framework_TestCase
         $this->class->setup_test_db( );
     }
 
+    function tearDown ( )
+    {
+        $this->class = null;
+    }
+
     function testInsert ( )
     {
         $row = $this->class->insert('mock_basic', array(

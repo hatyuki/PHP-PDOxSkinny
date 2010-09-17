@@ -18,6 +18,11 @@ class TestSkinnyInflate extends PHPUnit_Framework_TestCase
         ) );
     }
 
+    function tearDown ( )
+    {
+        $this->class = null;
+    }
+
 
     function testInflateInsertData ( )
     {

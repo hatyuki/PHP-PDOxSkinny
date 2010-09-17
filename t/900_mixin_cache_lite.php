@@ -33,6 +33,8 @@ class TestMixinCacheLite extends PHPUnit_Framework_TestCase
     {
         $this->remove_directory('./t/cache');
         unlink('./t/main.db');
+
+        $this->class = null;
     }
 
     function remove_directory($dir) {
