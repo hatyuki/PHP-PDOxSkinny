@@ -7,6 +7,9 @@ class TestSkinnySuite
     {
         $suite = new PHPUnit_Framework_TestSuite( );
 
+        include_once '001_compile.php';
+        $suite->addTestSuite('TestSkinnyCompile');
+
         include_once '002_new.php';
         $suite->addTestSuite('TestSkinnyNew');
 
@@ -24,6 +27,9 @@ class TestSkinnySuite
 
         include_once '105_count.php';
         $suite->addTestSuite('TestSkinnyCount');
+
+        include_once '106_inflate.php';
+        $suite->addTestSuite('TestSkinnyInflate');
 
         include_once '200_sql.php';
         $suite->addTestSuite('TestSkinnySQL');
