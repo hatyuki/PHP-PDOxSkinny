@@ -165,7 +165,7 @@ class TestMixinCacheLite extends PHPUnit_Framework_TestCase
     {
         $cache_config = array(
             'cacheDir' => './t/cache/',
-            'lifeTime' => 3,
+            'lifeTime' => 1,
         );
         $this->class->mixin( array(
             'SkinnyMixinCacheLite' => $cache_config,
@@ -183,7 +183,7 @@ class TestMixinCacheLite extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->class->cache_hit( ));
 
 
-        sleep(4);
+        sleep(1);
 
 
         $itr = $this->class->search_by_sql_with_cache(
