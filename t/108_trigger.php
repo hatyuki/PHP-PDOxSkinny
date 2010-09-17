@@ -12,12 +12,7 @@ class TestSkinnyTrigger extends PHPUnit_Framework_TestCase
     {
         $this->class = new MockTrigger( );
         $this->class->setup_test_db( );
-        //$row  = $this->class->insert('mock_inflate', array(
-            //'id'   => 1,
-            //'name' => 'perl',
-        //) );
     }
-
 
     function tearDown ( )
     {
@@ -25,65 +20,65 @@ class TestSkinnyTrigger extends PHPUnit_Framework_TestCase
     }
 
 
-    //function testSchemaInfo ( )
-    //{
-        //$this->assertTrue( is_a($this->class->schema, 'MockTriggerSchema') );
+    function testSchemaInfo ( )
+    {
+        $this->assertTrue( is_a($this->class->schema, 'MockTriggerSchema') );
 
-        //$info = $this->class->schema->schema_info;
-        //$keys = array(
-            //'mock_trigger_pre', 'mock_trigger_post', 'mock_trigger_post_delete',
-        //);
+        $info = $this->class->schema->schema_info;
+        $keys = array(
+            'mock_trigger_pre', 'mock_trigger_post', 'mock_trigger_post_delete',
+        );
 
-        //foreach ($keys as $key) {
-            //$this->assertArrayHasKey($key, $info);
-        //}
+        foreach ($keys as $key) {
+            $this->assertArrayHasKey($key, $info);
+        }
 
-        //$trigger = $info['mock_trigger_pre']['trigger'];
-        //$keys = array(
-            //'pre_insert', 'post_insert',
-            //'pre_update', 'post_update',
-            //'pre_delete', 'post_delete',
-        //);
+        $trigger = $info['mock_trigger_pre']['trigger'];
+        $keys = array(
+            'pre_insert', 'post_insert',
+            'pre_update', 'post_update',
+            'pre_delete', 'post_delete',
+        );
 
-        //foreach ($keys as $key) {
-            //$this->assertArrayHasKey($key, $trigger);
-        //}
+        foreach ($keys as $key) {
+            $this->assertArrayHasKey($key, $trigger);
+        }
 
-        //$this->assertEquals(sizeof($trigger['pre_insert']), 2);
-        //$this->assertEquals($trigger['pre_insert'][0][1], 'pre_insert');
-        //$this->assertEquals($trigger['pre_insert'][1][1], 'pre_insert_s');
-    //}
+        $this->assertEquals(sizeof($trigger['pre_insert']), 2);
+        $this->assertEquals($trigger['pre_insert'][0][1], 'pre_insert');
+        $this->assertEquals($trigger['pre_insert'][1][1], 'pre_insert_s');
+    }
 
 
-    //function testInsertTrigger ( )
-    //{
-        //$row = $this->class->insert('mock_trigger_pre', array(
-            //'id' => 1,
-        //) );
-        //$this->assertTrue( is_a($row, 'SkinnyRow') );
-        //$this->assertEquals($row->name, 'pre_insert_s');
+    function testInsertTrigger ( )
+    {
+        $row = $this->class->insert('mock_trigger_pre', array(
+            'id' => 1,
+        ) );
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
+        $this->assertEquals($row->name, 'pre_insert_s');
 
-        //$p_row = $this->class->single('mock_trigger_post', array(
-            //'id' => 1,
-        //) );
-        //$this->assertTrue( is_a($p_row, 'SkinnyRow') );
-        //$this->assertEquals($p_row->name, 'post_insert');
+        $p_row = $this->class->single('mock_trigger_post', array(
+            'id' => 1,
+        ) );
+        $this->assertTrue( is_a($p_row, 'SkinnyRow') );
+        $this->assertEquals($p_row->name, 'post_insert');
 
-    //}
+    }
 
-    //function testUpdateTrigger ( )
-    //{
-        //$this->class->insert('mock_trigger_pre', array(
-            //'id' => 1,
-        //) );
-        //$res = $this->class->update('mock_trigger_pre', array( ));
+    function testUpdateTrigger ( )
+    {
+        $this->class->insert('mock_trigger_pre', array(
+            'id' => 1,
+        ) );
+        $res = $this->class->update('mock_trigger_pre', array( ));
 
-        //$p_row = $this->class->single('mock_trigger_post', array(
-            //'id' => 1,
-        //) );
-        //$this->assertTrue( is_a($p_row, 'SkinnyRow') );
-        //$this->assertEquals($p_row->name, 'post_update');
-    //}
+        $p_row = $this->class->single('mock_trigger_post', array(
+            'id' => 1,
+        ) );
+        $this->assertTrue( is_a($p_row, 'SkinnyRow') );
+        $this->assertEquals($p_row->name, 'post_update');
+    }
 
     function testUpdateAffectRowObject ( )
     {
@@ -98,34 +93,22 @@ class TestSkinnyTrigger extends PHPUnit_Framework_TestCase
     }
 
 
-    //function testInflateUpdateData ( )
-    //{
-        //$name = new MockInflateName( array('name' => 'ruby') );
-        //$this->assertEquals(
-            //$this->class->update(
-                //'mock_inflate',
-                //array('name' => $name),
-                //array('id'   => 1)
-            //),
-            //1
-        //);
-        //$row = $this->class->single('mock_inflate', array('id' => 1));
+    function testDeleteTrigger ( )
+    {
+        $this->class->insert('mock_trigger_pre', array(
+            'id' => 1,
+        ) );
+        $this->class->insert('mock_trigger_pre', array(
+            'id'   => 2,
+            'name' => 'pre',
+        ) );
+        $this->class->delete('mock_trigger_pre', array( ));
 
-        //$this->assertTrue( is_a($row, 'SkinnyRow') );
-        //$this->assertTrue( is_a($row->name, 'MockInflateName') );
-        //$this->assertEquals($row->name->name, 'ruby');
-    //}
+        $count = $this->class->count('mock_trigger_post', 'id', array( ));
+        $this->assertEquals($count, 0);
 
-
-    //function testInflateUpdateRow ( )
-    //{
-        //$row  = $this->class->single('mock_inflate', array('id' => 1));
-        //$name = $row->name;
-        //$name->name = 'perl';
-        //$row->update( array('name' => $name) );
-
-        //$updated = $this->class->single('mock_inflate', array('id' => 1));
-        //$this->assertTrue( is_a($updated->name, 'MockInflateName') );
-        //$this->assertEquals($updated->name->name, 'perl');
-    //}
+        $row = $this->class->single('mock_trigger_post_delete', array('id' => 1));
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
+        $this->assertEquals($row->name, 'post_delete');
+    }
 }

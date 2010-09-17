@@ -112,7 +112,7 @@ class MockTriggerSchema extends SkinnySchema
 
     function post_delete ($skinny, $args)
     {
-        $this->insert('mock_trigger_post_delete', array(
+        $skinny->insert('mock_trigger_post_delete', array(
             'id'   => 1,
             'name' => 'post_delete',
         ) );
