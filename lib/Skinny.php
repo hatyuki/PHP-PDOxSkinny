@@ -53,7 +53,7 @@ class PDOxSkinny
         if ( is_a($args, 'PDOxSkinny') ) {
             $this->dbh         = $args->dbh( );
             $this->dbd         = $args->dbd( );
-            $this->schema      = $args->schema( );
+            $this->schema      = $args->schema;
             $this->raise_error = $args->raise_error( );
             $this->profile     = $args->profile( );
             $this->logfile     = $args->logfile( );
@@ -680,6 +680,7 @@ class PDOxSkinny
 
         $ret = $sth->rowCount( );
         $this->close_sth($sth);
+        $this->call_schema_trigger('post_update', $schema, $table, $ret);
 
         return $ret;
     }
