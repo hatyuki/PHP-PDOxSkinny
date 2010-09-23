@@ -13,6 +13,9 @@ class TestSkinnySuite
         include_once '002_new.php';
         $suite->addTestSuite('TestSkinnyNew');
 
+        include_once '100_schema_info.php';
+        $suite->addTestSuite('TestSkinnySchemaInfo');
+
         include_once '101_insert.php';
         $suite->addTestSuite('TestSkinnyInsert');
 
