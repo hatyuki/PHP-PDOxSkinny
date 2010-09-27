@@ -38,7 +38,7 @@ class SkinnyIterator
         }
 
         if ($this->sth) {
-            $row =& $this->sth->fetch(PDO::FETCH_ASSOC);
+            $row = $this->sth->fetch(PDO::FETCH_ASSOC);
 
             if ( !$row ) {
                 $this->skinny->close_sth($this->sth);

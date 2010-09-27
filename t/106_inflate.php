@@ -12,9 +12,11 @@ class TestSkinnyInflate extends PHPUnit_Framework_TestCase
     {
         $this->class = new MockInflate( );
         $this->class->setup_test_db( );
+
+        $name = new MockInflateName( array('name' => 'perl') );
         $row  = $this->class->insert('mock_inflate', array(
             'id'   => 1,
-            'name' => 'perl',
+            'name' => $name,
         ) );
     }
 
