@@ -139,7 +139,10 @@ class SkinnyRow
         }
 
         $where  = $this->update_or_delete_cond($table);
-        $result = $this->skinny->update($table, &$args, $where);
+        $result = call_user_func_array(
+            array($this->skinny, 'update'),
+            array($table, &$args, $where)
+        );
 
         $this->set($args);
 
