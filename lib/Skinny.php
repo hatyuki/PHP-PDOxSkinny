@@ -686,7 +686,7 @@ class PDOxSkinny
     }
 
 
-    function update_by_sql ($sql, $bind)
+    function update_by_sql ($sql, $bind=array( ))
     {
         $sth = $this->execute($sql, $bind);
 
@@ -727,7 +727,7 @@ class PDOxSkinny
     }
 
 
-    function delete_by_sql ($sql, $bind)
+    function delete_by_sql ($sql, $bind=array( ))
     {
         $sth = $this->execute($sql, $bind);
 
