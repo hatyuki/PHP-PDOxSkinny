@@ -22,14 +22,13 @@ class SkinnyTransaction
     function __get ($name)
     {
         switch ($name) {
-        case 'rollback': break;
-        case 'commit':   break;
+        case 'rollback':
+        case 'commit':
+            return $this->$name( );
 
         default:
             trigger_error("call unknown method: $name", E_USER_ERROR);
         }
-
-        return $this->$name( );
     }
 
 

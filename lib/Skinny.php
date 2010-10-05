@@ -161,7 +161,7 @@ class PDOxSkinny
     function txn_begin ($name='')
     {
         $count = ++$this->active_transaction;
-        $this->profiler("BEGIN TRANSACTION [$name : $count]");
+        $this->profiler("BEGIN TRANSACTION ($count) $name");
 
         if ($count > 1) {
             return null;
@@ -184,7 +184,7 @@ class PDOxSkinny
 
         if ($this->active_transaction == 1) {
             $count = $this->active_transaction;
-            $this->profiler("ROLLBACK TRANSACTION [$name : $count]");
+            $this->profiler("ROLLBACK TRANSACTION ($count) $name");
             if ( $this->dbh->rollBack( ) ) {
                 return $this->txn_end( );
             };
@@ -194,7 +194,7 @@ class PDOxSkinny
         else if ($this->active_transaction > 1) {
             $count = $this->active_transaction--;
             $this->rollbacked_in_nested_transaction = true;
-            $this->profiler("ROLLBACK TRANSACTION [$name : $count]");
+            $this->profiler("ROLLBACK NESTED TRANSACTION ($count) $name");
 
             return true;
         }
@@ -221,11 +221,11 @@ class PDOxSkinny
         }
         else if ($this->active_transaction > 1) {
             $this->active_transaction--;
-            $this->profiler("COMMIT TRANSACTION [$name : $count]");
+            $this->profiler("COMMIT NESTED TRANSACTION ($count) $name");
             return true;
         }
 
-        $this->profiler("COMMIT TRANSACTION [$name : $count]");
+        $this->profiler("COMMIT TRANSACTION ($count) $name");
         $this->dbh->commit( );
 
         return $this->txn_end( );
