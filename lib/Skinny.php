@@ -35,6 +35,7 @@ class PDOxSkinny
     public    $in_storage                       = false;     // -- Bool
     public    $raise_error                      = false;     // -- Bool
     public    $persistent                       = false;     // -- Bool
+    public    $suppress_row_objects             = false;     // -- Bool
     protected $dsn                              = null;      // -- Str
     protected $username                         = null;      // -- Str
     protected $password                         = null;      // -- Str
@@ -81,6 +82,10 @@ class PDOxSkinny
             $this->persistent = isset($args['persistent'])
                               ? $args['persistent']
                               : false;
+
+            $this->suppress_row_objects = isset($args['suppress_row_objects'])
+                                        ? $args['suppress_row_objects']
+                                        : false;
 
             if ( isset($args['profile']) ) {
                 $this->profile = $args['profile'];
@@ -542,10 +547,11 @@ class PDOxSkinny
     function data2itr ($table, $data)
     {
         return new SkinnyIterator( array(
-            'skinny'         => $this,
-            'data'           => $data,
-            'row_class'      => $this->mk_row_class($table),
-            'opt_table_info' => $table,
+            'skinny'           => $this,
+            'data'             => $data,
+            'row_class'        => $this->mk_row_class($table),
+            'opt_table_info'   => $table,
+            'suppress_objects' => $this->suppress_row_objects,
         ) );
     }
 
@@ -796,10 +802,11 @@ class PDOxSkinny
         $table = $this->guess_table_name($sql);
 
         return new SkinnyIterator( array(
-            'skinny'         => $this,
-            'sth'            => $sth,
-            'row_class'      => $this->mk_row_class($table),
-            'opt_table_info' => $opt_table_info,
+            'skinny'           => $this,
+            'sth'              => $sth,
+            'row_class'        => $this->mk_row_class($table),
+            'opt_table_info'   => $opt_table_info,
+            'suppress_objects' => $this->suppress_row_objects,
         ) );
     }
 

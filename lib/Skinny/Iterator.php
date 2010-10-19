@@ -5,15 +5,16 @@ require_once 'Skinny/Row.php';
 // SkinnyIterator based on DBIx::Skinny 0.04
 class SkinnyIterator
 {
-    public    $opt_table_info = null;      // -- Str
-    public    $skinny         = null;      // -- Object
-    protected $sth            = null;      // -- Object
-    protected $data           = null;      // -- Array
-    protected $row_class      = null;      // -- Str
-    protected $position       = 0;         // -- Int
-    protected $base_row_class = null;      // -- Str
-    protected $rows_cache     = array( );  // -- Array
-    protected $cache          = true;      // -- Bool
+    public    $opt_table_info   = null;      // -- Str
+    public    $skinny           = null;      // -- Object
+    public    $cache            = true;      // -- Bool
+    public    $suppress_objects = false;     // -- Bool
+    protected $sth              = null;      // -- Object
+    protected $data             = null;      // -- Array
+    protected $row_class        = null;      // -- Str
+    protected $position         = 0;         // -- Int
+    protected $base_row_class   = null;      // -- Str
+    protected $rows_cache       = array( );  // -- Array
 
 
     function __construct ($args)
@@ -57,23 +58,19 @@ class SkinnyIterator
             return null;
         }
 
-        if ( is_a($row, 'SkinnyRow') ) {
-            return $row;
-        }
-
-        $args = array(
-            'row_data'       => $row,
-            'skinny'         => $this->skinny,
-            'opt_table_info' => $this->opt_table_info,
-        );
-
-
-        if ( class_exists($this->row_class) ) {
-            $class = $this->row_class;
-            $obj   = new $class($args);
+        if (is_object($row) || $this->suppress_objects) {
+            $obj = $row;
         }
         else {
-            $obj = new SkinnyRow($args);
+            $class = class_exists($this->row_class)
+                   ? $this->row_class
+                   : 'SkinnyRow';
+
+            $obj = new $class( array(
+                'row_data'       => $row,
+                'skinny'         => $this->skinny,
+                'opt_table_info' => $this->opt_table_info,
+            ) );
         }
 
         if ($this->cache) {
@@ -158,18 +155,5 @@ class SkinnyIterator
     function position ( )
     {
         return $this->position;
-    }
-
-    function no_cache ( )
-    {
-        $this->cache = false;
-        return $this;
-    }
-
-
-    function with_cache ( )
-    {
-        $this->cache = true;
-        return $this;
     }
 }

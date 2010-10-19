@@ -72,6 +72,122 @@ class TestSkinnyIterator extends PHPUnit_Framework_TestCase
     }
 
 
+    function testIteratorNoCacheAll ( )
+    {
+        $itr = $this->class->search('mock_basic');
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+
+        $itr->cache = false;
+
+        $this->assertEquals($itr->count( ), 3);
+        $rows = $itr->all( );
+        $this->assertEquals(sizeof($rows), 0);
+
+        $this->assertEquals($itr->reset( ), $itr);
+        $this->assertNull($itr->next( ));
+    }
+
+
+    function testIteratorNoCache ( )
+    {
+        $itr = $this->class->search('mock_basic');
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+        $this->assertEquals($itr->position( ), 0);
+
+        $itr->cache = false;
+
+        $row1 = $itr->next( );
+        $this->assertTrue( is_a($row1, 'SkinnyRow') );
+        $this->assertEquals($itr->position( ), 1);
+
+        $row2 = $itr->next( );
+        $this->assertTrue( is_a($row2, 'SkinnyRow') );
+        $this->assertEquals($itr->position( ), 2);
+
+        $row3 = $itr->next( );
+        $this->assertTrue( is_a($row3, 'SkinnyRow') );
+        $this->assertEquals($itr->position( ), 3);
+
+        $this->assertNull( $itr->next( ) );
+        $this->assertEquals($itr->position( ), 3);
+        $this->assertEquals($itr->reset( ), $itr);
+        $this->assertEquals($itr->position( ), 0);
+        $this->assertNull($itr->first( ));
+    }
+
+
+    function testIteratorNoMakeObject ( )
+    {
+        $itr = $this->class->search('mock_basic');
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+
+        $itr->suppress_objects = true;
+
+        $row = $itr->next( );
+        $this->assertTrue( is_array($row) );
+        $this->assertEquals($row, array(
+            'id'        => 1,
+            'delete_fg' => 0,
+            'name'      => 'perl',
+        ) );
+
+        $itr->suppress_objects = false;
+        $row = $itr->next( );
+        $this->assertTrue( is_a($row, 'SkinnyRow') );
+        $dat = $row->get_columns( );
+        $this->assertEquals($dat, array(
+            'id'        => 2,
+            'delete_fg' => 0,
+            'name'      => 'ruby',
+        ) );
+    }
+
+
+    function testIteratorWithSuppressRowObject ( )
+    {
+        $this->class->suppress_row_objects = true;
+        $itr = $this->class->search('mock_basic');
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+
+        $row = $itr->next( );
+        $this->assertTrue( is_array($row) );
+        $this->assertEquals($row, array(
+            'id'        => 1,
+            'delete_fg' => 0,
+            'name'      => 'perl',
+        ) );
+
+        $row = $itr->next( );
+        $this->assertTrue( is_array($row) );
+        $this->assertEquals($row, array(
+            'id'        => 2,
+            'delete_fg' => 0,
+            'name'      => 'ruby',
+        ) );
+
+        $itr->reset( );
+
+        $row = $itr->next( );
+        $this->assertTrue( is_array($row) );
+        $this->assertEquals($row, array(
+            'id'        => 1,
+            'delete_fg' => 0,
+            'name'      => 'perl',
+        ) );
+    }
+
+
+    function testIteratorWithSuppressRowObjectOnWithCache ( )
+    {
+        $this->class->suppress_row_objects = true;
+        $itr = $this->class->search('mock_basic');
+        $this->assertTrue( is_a($itr, 'SkinnyIterator') );
+
+        $row = $itr->next( );
+        $this->assertTrue( is_array($row) );
+    }
+
+
     function testBack ( )
     {
         $itr = $this->class->search('mock_basic');
