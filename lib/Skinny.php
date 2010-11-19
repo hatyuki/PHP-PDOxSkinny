@@ -530,12 +530,17 @@ class PDOxSkinny
 
             $args = array_merge($cond, $args);
             $row  = $this->insert($table, $args);
+            $pk   = $this->schema->schema_info[$table]['pk'];
+            $args[$pk] = $this->suppress_row_objects
+                       ? $row[$pk]
+                       : $row->get_raw_column($pk);
+
+            return $this->single($table, $args);
         }
         else {
             $this->in_storage = true;
+            return $row;
         }
-
-        return $row;
     }
 
     function find_or_create ($table, $cond, $args=array( ))
@@ -595,8 +600,21 @@ class PDOxSkinny
 
         $pk  = $schema->schema_info[$table]['pk'];
         $id  = isset($args[$pk]) ? $args[$pk] : $this->dbd->last_insert_id($this, $table);
-        $row = $this->single($table, array(
-            $schema->schema_info[$table]['pk'] => $id
+
+        if ($id) {
+            $args[$pk] = $id;
+        }
+
+        if ($row->suppress_row_objects) {
+            $this->call_schema_trigger('post_insert', $schema, $table, $args);
+            return $args;
+        }
+
+        $row_class = $this->mk_row_class($table);
+        $row = new $row_class( array(
+            'row_data'       => $args,
+            'skinny'         => $this,
+            'opt_table_info' => $table,
         ) );
 
         $this->call_schema_trigger('post_insert', $schema, $table, $row);
@@ -608,21 +626,7 @@ class PDOxSkinny
     function bulk_insert ($table, $args)
     {
         if ( method_exists($this->dbd, 'bulk_insert') ) {
-            try {
-                $this->is_error  = false;
-                $this->error_msg = null;
-                $this->dbd->bulk_insert($table, $args);
-            }
-            catch (Exception $e) {
-                $this->is_error  = true;
-                $this->error_msg = $e->toString( );
-
-                if ($this->raise_error) {
-                    throw new SkinnyException(
-                        $e->getMessage( ), Skinny::BULK_INSERT_ERROR
-                    );
-                }
-            }
+            $this->dbd->bulk_insert($this, $table, $args);
         }
         else {
             trigger_error("dbd don't provide bulk_insert method", E_USER_ERROR);
@@ -882,18 +886,18 @@ class PDOxSkinny
             $sth->execute($bind);
         }
         catch (Exception $e) {
-            $this->stack_trace($sth, $stmt, $bind, $e);
+            $this->stack_trace($sth, $stmt, $bind, $e->getMessage( ));
         }
 
         return $sth;
     }
 
 
-    protected function stack_trace ($sth, $stmt, $bind, $reason)
+    function stack_trace ($sth, $stmt, $bind, $reason)
     {
         if ($sth) { $this->close_sth($sth); }
 
-        $reason = preg_replace("/\n/", "\n          ", $reason->getMessage( ));
+        $reason = preg_replace("/\n/", "\n          ", $reason);
         $stmt   = preg_replace("/\n/", "\n          ", $stmt);
         $bind   = print_r($bind, true);
         $bind   = preg_replace("/\n/", "\n          ", $bind);
