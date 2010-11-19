@@ -1,5 +1,11 @@
 Revision history for PHP extension PDOxSkinny
 
+0.0733
+   2010-11-19
+        - FIX: bulk_insert method was broken
+        - ADD: support 'suppress_row_objects' option
+        - MOD: don't call single( ) after call create( )
+
 0.0732
    2010-08-23
         - MOD: refactoring update / update_by_sql / delete_by_sql methods (incompatible changes)
