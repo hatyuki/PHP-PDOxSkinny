@@ -156,4 +156,18 @@ class SkinnyIterator
     {
         return $this->position;
     }
+
+
+    function with_cache ( )
+    {
+        $this->cache = true;
+        return $this;
+    }
+
+
+    function no_cache ( )
+    {
+        $this->cache = false;
+        return $this;
+    }
 }
