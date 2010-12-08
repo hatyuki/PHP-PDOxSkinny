@@ -601,7 +601,7 @@ class PDOxSkinny
             $args[$pk] = $id;
         }
 
-        if ($row->suppress_row_objects) {
+        if ($this->suppress_row_objects) {
             $this->call_schema_trigger('post_insert', $schema, $table, $args);
             return $args;
         }

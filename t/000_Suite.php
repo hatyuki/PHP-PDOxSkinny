@@ -5,6 +5,7 @@ class TestSkinnySuite
 {
     public static function suite ( )
     {
+        error_reporting(E_ALL | E_STRICT);
         $suite = new PHPUnit_Framework_TestSuite( );
 
         include_once '001_compile.php';
