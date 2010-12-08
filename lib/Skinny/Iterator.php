@@ -160,6 +160,7 @@ class SkinnyIterator
 
     function with_cache ( )
     {
+        SkinnyUtil::deprecated('$itr->cache = true');
         $this->cache = true;
         return $this;
     }
@@ -167,6 +168,7 @@ class SkinnyIterator
 
     function no_cache ( )
     {
+        SkinnyUtil::deprecated('$itr->cache = false');
         $this->cache = false;
         return $this;
     }

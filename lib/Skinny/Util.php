@@ -28,4 +28,11 @@ class SkinnyUtil
     {
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $str)));
     }
+
+    static function deprecated ($alt)
+    {
+        $trace  = debug_backtrace( );
+        $method = $trace[1]['function'];
+        trigger_error("$method is deprecated. use '$alt' instead.", E_USER_NOTICE);
+    }
 }
