@@ -100,7 +100,9 @@ class SkinnyRow
             $this->row_data[$col] =
                 $this->skinny->schema( )->call_deflate($col, $val);
             $this->get_column_cached[$col] = $val;
-            $this->dirty_columns[$col] = true;
+            $this->dirty_columns[$col]  = true;
+            $this->select_columns[$col] = $val;
+            $this->select_alias[ ]      = $col;
         }
 
         return $this;
