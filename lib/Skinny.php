@@ -153,20 +153,16 @@ class PDOxSkinny
     /* ---------------------------------------------------------------
      *  Transaction Support
      */
-    function txn_scope ($name='')
+    function txn_scope ($name=null)
     {
-        if ( !$name ) {
-            $name = sha1(mt_rand( ));
-        }
-
         return new SkinnyTransaction($this, $name);
     }
 
 
-    function txn_begin ($name='')
+    function txn_begin ($name=null)
     {
         $count = ++$this->active_transaction;
-        $this->profiler("BEGIN TRANSACTION ($count) $name");
+        $this->profiler("BEGIN TRANSACTION ($count)".($name ? " $name" : ''));
 
         if ($count > 1) {
             return null;
@@ -180,7 +176,7 @@ class PDOxSkinny
     }
 
 
-    function txn_rollback ($name='')
+    function txn_rollback ($name=null)
     {
         if ( !$this->active_transaction ) {
             $this->txn_end( );
@@ -189,7 +185,7 @@ class PDOxSkinny
 
         if ($this->active_transaction == 1) {
             $count = $this->active_transaction;
-            $this->profiler("ROLLBACK TRANSACTION ($count) $name");
+            $this->profiler("ROLLBACK TRANSACTION ($count)".($name ? " $name" : ''));
             if ( $this->dbh->rollBack( ) ) {
                 return $this->txn_end( );
             };
@@ -199,7 +195,7 @@ class PDOxSkinny
         else if ($this->active_transaction > 1) {
             $count = $this->active_transaction--;
             $this->rollbacked_in_nested_transaction = true;
-            $this->profiler("ROLLBACK NESTED TRANSACTION ($count) $name");
+            $this->profiler("ROLLBACK NESTED TRANSACTION ($count)".($name ? " $name" : ''));
 
             return true;
         }
@@ -208,7 +204,7 @@ class PDOxSkinny
     }
 
 
-    function txn_commit ($name='')
+    function txn_commit ($name=null)
     {
         if ( !$this->active_transaction ) {
             $this->txn_end( );
@@ -226,11 +222,11 @@ class PDOxSkinny
         }
         else if ($this->active_transaction > 1) {
             $this->active_transaction--;
-            $this->profiler("COMMIT NESTED TRANSACTION ($count) $name");
+            $this->profiler("COMMIT NESTED TRANSACTION ($count)".($name ? " $name" : ''));
             return true;
         }
 
-        $this->profiler("COMMIT TRANSACTION ($count) $name");
+        $this->profiler("COMMIT TRANSACTION ($count)".($name ? " $name" : ''));
         $this->dbh->commit( );
 
         return $this->txn_end( );
@@ -712,7 +708,7 @@ class PDOxSkinny
     }
 
 
-    function delete ($table, $where)
+    function delete ($table, $where=array( ))
     {
         $schema = $this->schema;
 

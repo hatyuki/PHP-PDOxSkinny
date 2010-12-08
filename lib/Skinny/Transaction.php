@@ -9,7 +9,7 @@ class SkinnyTransaction
     protected $name   = null;   // -- String
 
 
-    function __construct ($skinny, $name='')
+    function __construct ($skinny, $name=null)
     {
         $this->status =  false;
         $this->skinny = $skinny;
