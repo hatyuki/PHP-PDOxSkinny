@@ -617,6 +617,20 @@ class SkinnySQL
     }
 
 
+    function add_where_raw ($term, $bind=array( ))
+    {
+        $this->where[ ] = "($term)";
+
+        if ( !empty($bind) ) {
+            $this->bind = array_merge(
+                $this->bind, is_array($bind) ? $bind : array($bind)
+            );
+        }
+
+        return $this;
+    }
+
+
     protected function parse_array_terms ($terms_list)
     {
         $out   = array( );

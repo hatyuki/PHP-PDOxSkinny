@@ -14,7 +14,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testFrom ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->from('foo');
         $this->assertEquals("FROM foo\n", $obj->as_sql( ));
@@ -31,7 +31,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testJoin ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $join = array(
             'foo' => array(
@@ -59,7 +59,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testJoinTwice ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $join = array(
             'foo' => array(
@@ -111,7 +111,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testJoinUsing ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $join = array(
             'foo' => array(
@@ -144,7 +144,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testGroupBy ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->from('foo');
         $obj->group( array('column' => 'baz') );
@@ -171,7 +171,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testOrderBy ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->from('foo');
         $obj->order( array('column' => 'baz', 'desc' => 'DESC') );
@@ -187,7 +187,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testGroupByPlusOrderBy ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->from('foo');
         $obj->group( array('column' => 'quux') );
@@ -197,7 +197,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testLimitOffset ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->from('foo');
         $obj->limit(5);
@@ -209,7 +209,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere1 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => 'bar') );
         $bind = $obj->bind( );
@@ -221,7 +221,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere2 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => array('bar', 'baz')) );
         $bind = $obj->bind( );
@@ -234,7 +234,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere3 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => array('in' => array('bar', 'baz') ) ) );
         $bind = $obj->bind( );
@@ -247,7 +247,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere4 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => array('not in' => array('bar', 'baz') ) ) );
         $bind = $obj->bind( );
@@ -260,7 +260,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere5 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => array('!=' => 'bar') ) );
         $bind = $obj->bind( );
@@ -272,7 +272,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere6 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => array('inject' => 'IS NOT NULL') ) );
         $bind = $obj->bind( );
@@ -283,7 +283,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere7 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => 'bar') );
         $obj->add_where( array('baz' => 'quux') );
@@ -296,7 +296,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
     }
 
     function testWhere8 ( ) {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where(
             array('foo' => array(
@@ -315,7 +315,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere9 ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where(
             array('foo' => array(
@@ -334,7 +334,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testWhere10 ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where(
             array('foo' => array(
@@ -352,7 +352,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testModifiedParameters1 ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $terms = array('foo' => array('-and', 'foo', 'bar', 'baz'));
         $obj->add_where($terms);
@@ -363,7 +363,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testModifiedParameters2 ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_select( array('foo' => 'foo') );
         $obj->add_select('bar');
@@ -373,7 +373,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testModifiedParameters3 ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_select( array('f.foo' => 'foo') );
         $obj->add_select( array('COUNT(*)' => 'count') );
@@ -388,7 +388,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testOptionalWhere1 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => array('between' => array(1, 100))) );
         $bind = $obj->bind( );
@@ -401,7 +401,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testOptionalWhere2 ( )
     {    
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_where( array('foo' => array('like' => 'baz')) );
         $bind = $obj->bind( );
@@ -413,7 +413,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testHaving ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_select('foo');
         $obj->add_select( array('COUNT(*)' => 'count') );
@@ -438,7 +438,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testDistinct ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_select( array('foo' => 'foo') );
         $obj->from('baz');
@@ -450,7 +450,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testComment ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_select( array('foo' => 'foo') );
         $obj->from('baz');
@@ -466,7 +466,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testCurrval ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_select("CURRVAL('foo_id_seq')");
         $this->assertEquals("SELECT CURRVAL('foo_id_seq')\n", $obj->as_sql( ));
@@ -474,7 +474,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testIndexHint ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_select( array('foo' => 'foo') );
         $obj->from( array('baz') );
@@ -491,7 +491,7 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
 
     function testIndexHintWithJoins ( )
     {
-        $obj =& $this->class;
+        $obj = $this->class;
 
         $obj->add_select( array('foo' => 'foo') );
         $obj->add_index_hint( array(
@@ -526,5 +526,29 @@ class TestSkinnySQL extends PHPUnit_Framework_TestCase
             )
         ) );
         $this->assertEquals("SELECT foo\nFROM baz USE INDEX (index_hint) INNER JOIN baz b1 ON (baz.baz_id = b1.baz_id AND b1.quux_id = 1) LEFT JOIN baz b2 ON (baz.baz_id = b2.baz_id AND b2.quux_id = 2)\n", $obj->as_sql( ));
+    }
+
+    function testWhereRaw ( )
+    {
+        $obj = $this->class;
+        $obj->add_where_raw('exists(SELECT * WHERE type = ?)', 5);
+        $this->assertEquals($obj->as_sql_where( ), "WHERE (exists(SELECT * WHERE type = ?))\n");
+        $this->assertEquals(count($obj->bind( )), 1);
+        $this->assertEquals($obj->bind( ), array(5));
+    }
+
+    function testNestedWhereRaw ( )
+    {
+        $nested = $this->class;
+        $nested->add_select('*');
+        $nested->from('foo');
+        $nested->add_where( array('type' => array(3, 4, 5)) );
+
+        $obj = new SkinnySQL( );
+        $obj->add_where_raw(sprintf('exists(%s)', $nested->as_sql( )), $nested->bind( ));
+
+        $this->assertEquals($obj->as_sql_where( ), "WHERE (exists(SELECT *\nFROM foo\nWHERE (type IN (?, ?, ?))\n))\n");
+        $this->assertEquals(count($obj->bind( )), 3);
+        $this->assertEquals($obj->bind( ), array(3, 4, 5));
     }
 }
