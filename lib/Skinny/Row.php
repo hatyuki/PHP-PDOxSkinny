@@ -140,7 +140,7 @@ class SkinnyRow
             $table = array_shift($table);
         }
 
-        $where  = $this->update_or_delete_cond($table);
+        $where  = $this->where_cond($table);
         $result = call_user_func_array(
             array($this->skinny, 'update'),
             array($table, &$args, $where)
@@ -156,7 +156,7 @@ class SkinnyRow
     {
         $table = $table ? $table : $this->opt_table_info;
 
-        $where = $this->update_or_delete_cond($table);
+        $where = $this->where_cond($table);
 
         return $this->skinny->delete($table, $where);
     }
@@ -165,7 +165,17 @@ class SkinnyRow
     function select_columns ( ) { return $this->select_columns; }
 
 
-    protected function update_or_delete_cond ($table)
+    function refetch ($table=null)
+    {
+        if ( empty($table) ) {
+            $table = $this->opt_table_info;
+        }
+
+        return $this->skinny->single($table, $this->where_cond($table));
+    }
+
+
+    protected function where_cond ($table)
     {
         if ( empty($table) ) {
             trigger_error('no table info', E_USER_ERROR);
