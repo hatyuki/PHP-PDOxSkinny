@@ -38,6 +38,9 @@ class TestSkinnySuite
         include_once '108_trigger.php';
         $suite->addTestSuite('TestSkinnyTrigger');
 
+        include_once '121_refetch.php';
+        $suite->addTestSuite('TestSkinnyRefetch');
+
         include_once '200_sql.php';
         $suite->addTestSuite('TestSkinnySQL');
 
