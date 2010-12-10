@@ -33,6 +33,6 @@ class SkinnyUtil
     {
         $trace  = debug_backtrace( );
         $method = $trace[1]['function'];
-        trigger_error("$method is deprecated. use '$alt' instead.", E_USER_NOTICE);
+        trigger_error("'$method' is deprecated. use '$alt' instead.", E_USER_NOTICE);
     }
 }
