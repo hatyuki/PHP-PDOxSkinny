@@ -1,5 +1,9 @@
 Revision history for PHP extension PDOxSkinny
 
+0.0736
+   2010-12-09
+        - FIX: SkinnySQL::retrieve was broken (thrown exception when call SkinnyRow::refetch( ))
+
 0.0735
    2010-12-09
         - ADD: new features SkinnyRow::refetch( )
