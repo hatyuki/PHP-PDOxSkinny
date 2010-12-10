@@ -680,7 +680,7 @@ class SkinnySQL
     {
         if ( !$table ) {
             $table = isset($this->from[0])
-                   ? $this->from
+                   ? $this->from[0]
                    : null;
         }
 
